@@ -8,9 +8,17 @@ import java.sql.SQLException;
 public class DaoFactory {
     private DaoFactory() {}
 
-    public static PgUserDAO getUserDAO(ConnectionStrategy connectionStrategy) throws SQLException {
+    public static UserDAO getUserDAO(ConnectionStrategy connectionStrategy) throws SQLException {
         if (connectionStrategy instanceof PgConnectionStrategy) {
             return new PgUserDAO(connectionStrategy);
+        }
+
+        return null;
+    }
+
+    public static DatasetDAO getDatasetDAO(ConnectionStrategy connectionStrategy) throws SQLException {
+        if (connectionStrategy instanceof PgConnectionStrategy) {
+            return new PgDatasetDAO(connectionStrategy);
         }
 
         return null;
