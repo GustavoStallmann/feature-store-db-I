@@ -1,7 +1,6 @@
 package com.bd_i.feature_store.dao;
 
 import com.bd_i.feature_store.persistence.ConnectionStrategy;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
@@ -16,7 +15,7 @@ public abstract class DAO<T, K> implements AutoCloseable {
 
     abstract protected T modelMapper(ResultSet resultSet) throws SQLException;
 
-    abstract List<T> list() throws SQLException;
+    abstract public List<T> list() throws SQLException;
     abstract public void create(T model) throws SQLException;
     abstract public void update(T model) throws SQLException;
     abstract public T select(K id) throws SQLException;
@@ -28,6 +27,10 @@ public abstract class DAO<T, K> implements AutoCloseable {
         }
 
         return connection;
+    }
+
+    protected ConnectionStrategy getConnectionStrategy() {
+        return connectionStrategy;
     }
 
     @Override
