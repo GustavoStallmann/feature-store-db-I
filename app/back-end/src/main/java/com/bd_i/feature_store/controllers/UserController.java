@@ -16,12 +16,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final PgConnectionStrategy pgConnectionStrategy;
     private final UserService userService;
-    private final ObjectMapper objectMapper;
 
     @GetMapping
     ResponseEntity<ResponseDTO<List<User>>> getUsers() throws SQLException {

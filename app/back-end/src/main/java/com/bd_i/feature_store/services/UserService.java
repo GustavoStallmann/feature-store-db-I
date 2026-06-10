@@ -2,6 +2,7 @@ package com.bd_i.feature_store.services;
 
 import com.bd_i.feature_store.dao.DaoFactory;
 import com.bd_i.feature_store.dao.PgUserDAO;
+import com.bd_i.feature_store.dao.UserDAO;
 import com.bd_i.feature_store.dto.CreateUserRequestDTO;
 import com.bd_i.feature_store.model.User;
 import com.bd_i.feature_store.model.UserType;
@@ -20,7 +21,7 @@ public class UserService {
 
     public void createUser(CreateUserRequestDTO payload) throws SQLException {
         try {
-            PgUserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
+            UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
             User user = new User(UUID.randomUUID(), payload.cpf(), payload.name(), UserType.user);
             userDAO.create(user);
         } catch (Exception e) {
@@ -30,7 +31,7 @@ public class UserService {
     }
 
     public List<User> getUsers() throws SQLException {
-        PgUserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
+        UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
         return userDAO.list();
     }
 }
