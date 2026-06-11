@@ -1,3 +1,0 @@
-PG_URL=localhost:5432/mydb
-PG_USER=tiago
-PG_PASSWORD=password
