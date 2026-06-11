@@ -60,7 +60,7 @@ public class PgDatasetDAO extends DatasetDAO {
     public void create(Dataset model) throws SQLException {
         String query = """
             INSERT INTO feature_app.dataset (id, criado_em, nome, usuario_criador, atualizado_em, descricao, origem)
-            VALUES (?::uuid, ?::timestamp, ?::uuid, ?::timestamp, ?, ?)
+            VALUES (?::uuid, ?::timestamp, ?, ?::uuid, ?::timestamp, ?, ?)
         """;
 
         Connection connection = getConnection();
