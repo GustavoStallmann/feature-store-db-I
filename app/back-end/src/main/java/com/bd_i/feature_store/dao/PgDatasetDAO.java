@@ -2,18 +2,17 @@ package com.bd_i.feature_store.dao;
 
 import com.bd_i.feature_store.model.Dataset;
 import com.bd_i.feature_store.model.User;
-import com.bd_i.feature_store.model.UserType;
 import com.bd_i.feature_store.persistence.ConnectionStrategy;
-import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.time.LocalDate;
 
 public class PgDatasetDAO extends DatasetDAO {
     public PgDatasetDAO(ConnectionStrategy connectionStrategy) throws SQLException {
@@ -23,16 +22,16 @@ public class PgDatasetDAO extends DatasetDAO {
     @Override
     protected Dataset modelMapper(ResultSet resultSet) throws SQLException {
         String id = resultSet.getString("id");
-        String createdAt = resultSet.getString("criado_em");
+        LocalDate createdAt = getLocalDate(resultSet, "criado_em");
         String name = resultSet.getString("nome");
         String creator = resultSet.getString("usuario_criador");
-        String updatedAt = resultSet.getString("atualizado_em");
+        LocalDate updatedAt = getLocalDate(resultSet, "atualizado_em");
         String description = resultSet.getString("descricao");
         String origin = resultSet.getString("origem");
 
         UserDAO userDAO = DaoFactory.getUserDAO(this.getConnectionStrategy());
         User user = userDAO.select(UUID.fromString(creator));
-        return new Dataset(UUID.fromString(id), LocalDate.parse(createdAt), name, user, LocalDate.parse(updatedAt), description, origin);
+        return new Dataset(UUID.fromString(id), createdAt, name, user, updatedAt, description, origin);
     }
 
     @Override
@@ -60,16 +59,16 @@ public class PgDatasetDAO extends DatasetDAO {
     public void create(Dataset model) throws SQLException {
         String query = """
             INSERT INTO feature_app.dataset (id, criado_em, nome, usuario_criador, atualizado_em, descricao, origem)
-            VALUES (?::uuid, ?::timestamp, ?::uuid, ?::timestamp, ?, ?)
+            VALUES (?::uuid, ?::timestamp, ?, ?::uuid, ?::timestamp, ?, ?)
         """;
 
         Connection connection = getConnection();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setObject(1, model.getId());
-            statement.setObject(2, model.getCreatedAt());
+            statement.setTimestamp(2, getTimestamp(model.getCreatedAt()));
             statement.setString(3, model.getName());
-            statement.setObject(4, model.getCreatorUser());
-            statement.setObject(5, model.getUpdatedAt());
+            statement.setObject(4, model.getCreatorUser().getId());
+            statement.setTimestamp(5, getTimestamp(model.getUpdatedAt()));
             statement.setString(6, model.getDescription());
             statement.setString(7, model.getOrigin());
 
@@ -81,15 +80,17 @@ public class PgDatasetDAO extends DatasetDAO {
     public void update(Dataset model) throws SQLException {
         String query = """
             UPDATE feature_app.dataset
-            SET nome = ?, descricao = ?
+            SET nome = ?, atualizado_em = ?::timestamp, descricao = ?, origem = ?
             WHERE id = ?::uuid
         """;
 
         Connection connection = getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, model.getName());
-            preparedStatement.setObject(2, model.getDescription());
-            preparedStatement.setObject(3, model.getId());
+            preparedStatement.setTimestamp(2, getTimestamp(model.getUpdatedAt()));
+            preparedStatement.setString(3, model.getDescription());
+            preparedStatement.setString(4, model.getOrigin());
+            preparedStatement.setObject(5, model.getId());
 
             preparedStatement.executeUpdate();
         }
@@ -110,8 +111,9 @@ public class PgDatasetDAO extends DatasetDAO {
             preparedStatement.setObject(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            dataset = modelMapper(resultSet);
+            if (resultSet.next()) {
+                dataset = modelMapper(resultSet);
+            }
         }
 
         return dataset;
@@ -129,5 +131,23 @@ public class PgDatasetDAO extends DatasetDAO {
             preparedStatement.setObject(1, id);
             preparedStatement.executeUpdate();
         }
+    }
+
+    private LocalDate getLocalDate(ResultSet resultSet, String column) throws SQLException {
+        Timestamp timestamp = resultSet.getTimestamp(column);
+
+        if (timestamp == null) {
+            return null;
+        }
+
+        return timestamp.toLocalDateTime().toLocalDate();
+    }
+
+    private Timestamp getTimestamp(LocalDate localDate) {
+        if (localDate == null) {
+            return null;
+        }
+
+        return Timestamp.valueOf(localDate.atStartOfDay());
     }
 }
