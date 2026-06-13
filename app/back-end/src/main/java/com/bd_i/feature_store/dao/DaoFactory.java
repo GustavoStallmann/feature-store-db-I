@@ -23,4 +23,12 @@ public class DaoFactory {
 
         return null;
     }
+
+    public static DatasetVersionDAO getDatasetVersionDAO(ConnectionStrategy connectionStrategy) throws SQLException {
+        if (connectionStrategy instanceof PgConnectionStrategy) {
+            return new PgDatasetVersionDAO(connectionStrategy);
+        }
+
+        return null;
+    }
 }

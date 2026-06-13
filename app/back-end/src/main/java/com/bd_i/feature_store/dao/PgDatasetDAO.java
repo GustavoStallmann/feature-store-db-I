@@ -82,7 +82,7 @@ public class PgDatasetDAO extends DatasetDAO {
         String query = """
             UPDATE feature_app.dataset
             SET nome = ?, descricao = ?
-            WHERE id = ?
+            WHERE id = ?::uuid
         """;
 
         Connection connection = getConnection();
@@ -121,7 +121,7 @@ public class PgDatasetDAO extends DatasetDAO {
     public void delete(UUID id) throws SQLException {
         String query = """
             DELETE FROM feature_app.dataset
-            WHERE id = ?:uuid
+            WHERE id = ?::uuid
         """;
 
         Connection connection = getConnection();
