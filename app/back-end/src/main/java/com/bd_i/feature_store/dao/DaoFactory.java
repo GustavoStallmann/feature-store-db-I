@@ -31,4 +31,12 @@ public class DaoFactory {
 
         return null;
     }
+
+    public static DownloadDAO getDownloadDAO(ConnectionStrategy connectionStrategy) throws SQLException {
+        if (connectionStrategy instanceof PgConnectionStrategy) {
+            return new PgDownloadDAO(connectionStrategy);
+        }
+
+        return null;
+    }
 }
