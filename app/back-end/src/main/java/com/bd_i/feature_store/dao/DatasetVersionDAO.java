@@ -13,4 +13,5 @@ public abstract class DatasetVersionDAO extends DAO<DatasetVersion, UUID> {
     }
 
     public abstract List<DatasetVersion> selectByDatasetId(UUID id) throws SQLException;
+    public abstract DatasetVersion selectByVersionAndDatasetId(int version, UUID datasetId) throws SQLException;
 }

@@ -220,4 +220,28 @@ public class PgDatasetVersionDAO extends DatasetVersionDAO {
 
         return model.getParentDatasetVersion().getId();
     }
+
+    @Override
+    public DatasetVersion selectByVersionAndDatasetId(int version, UUID datasetId) throws SQLException {
+        String query = """
+            SELECT *
+            FROM feature_app.versao_dataset
+            WHERE versao = ? AND dataset_id = ?::uuid
+            LIMIT 1
+        """;
+
+        Connection connection = getConnection();
+        DatasetVersion datasetVersion = null;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, version);
+            preparedStatement.setObject(2, datasetId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                datasetVersion = modelMapper(resultSet);
+            }
+        }
+
+        return datasetVersion;
+    }
 }

@@ -8,9 +8,12 @@ import com.bd_i.feature_store.services.DatasetVersionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -50,11 +53,28 @@ public class DatasetVersionController {
         );
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ResponseDTO<Void>> postDatasetVersion(
-            @Valid @RequestBody CreateDatasetVersionRequestDTO body
-    ) throws SQLException {
-        datasetVersionService.createDatasetVersion(body);
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("version") int version,
+            @RequestParam(value = "modifications", required = false) String modifications,
+            @RequestParam("submittingUserId") UUID submittingUserId,
+            @RequestParam("datasetId") UUID datasetId,
+            @RequestParam(value = "parentDatasetVersionId", required = false) UUID parentDatasetVersionId
+    ) throws SQLException, IOException {
+        if (version < 1) {
+            throw new IllegalArgumentException("Informe uma versão válida");
+        }
+
+        CreateDatasetVersionRequestDTO body = new CreateDatasetVersionRequestDTO(
+                version,
+                modifications,
+                "",
+                submittingUserId,
+                datasetId,
+                parentDatasetVersionId
+        );
+        datasetVersionService.createDatasetVersion(body, file);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseDTO<>("Versão do dataset criada com sucesso", null)

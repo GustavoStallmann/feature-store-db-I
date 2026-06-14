@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,20 @@ public class ApiExceptionHandler {
     public ResponseEntity<ResponseDTO<Void>> handleSqlException() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 new ResponseDTO<>("Falha ao acessar o banco de dados", null)
+        );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleIllegalArgumentException(IllegalArgumentException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseDTO<>(exception.getMessage(), null)
+        );
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleIOException(IOException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ResponseDTO<>("Erro ao salvar arquivo no servidor", null)
         );
     }
 

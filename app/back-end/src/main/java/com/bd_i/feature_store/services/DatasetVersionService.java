@@ -13,7 +13,14 @@ import com.bd_i.feature_store.model.User;
 import com.bd_i.feature_store.persistence.PgConnectionStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,15 +54,43 @@ public class DatasetVersionService {
         return datasetVersion;
     }
 
-    public void createDatasetVersion(CreateDatasetVersionRequestDTO payload) throws SQLException {
+    private final String uploadDir = "uploads/";
+
+    public void createDatasetVersion(
+            CreateDatasetVersionRequestDTO payload,
+            MultipartFile file
+    ) throws SQLException, IOException {
         DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
+        DatasetVersion existing = datasetVersionDAO.selectByVersionAndDatasetId(payload.version(), payload.datasetId());
+        if (existing != null) {
+            throw new IllegalArgumentException("Esta versão já existe para este dataset");
+        }
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("O arquivo enviado está vazio");
+        }
+
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+        Path targetPath = Paths.get(uploadDir).resolve(uniqueFilename);
+
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
         DatasetVersion datasetVersion = new DatasetVersion(
                 UUID.randomUUID(),
                 payload.version(),
                 payload.modifications(),
                 LocalDateTime.now(),
-                payload.filePath(),
+                targetPath.toAbsolutePath().toString(),
                 getUser(payload.submittingUserId()),
                 getDataset(payload.datasetId()),
                 getParentDatasetVersion(payload.parentDatasetVersionId())
