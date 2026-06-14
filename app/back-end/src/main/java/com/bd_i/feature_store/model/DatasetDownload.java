@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
-public class Download {
+public class DatasetDownload {
     private User user;
     private LocalDateTime downloadTime;
     private DatasetVersion datasetVersion;

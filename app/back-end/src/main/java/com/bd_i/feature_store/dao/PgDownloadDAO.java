@@ -1,7 +1,7 @@
 package com.bd_i.feature_store.dao;
 
+import com.bd_i.feature_store.model.DatasetDownload;
 import com.bd_i.feature_store.model.DatasetVersion;
-import com.bd_i.feature_store.model.Download;
 import com.bd_i.feature_store.model.User;
 import com.bd_i.feature_store.persistence.ConnectionStrategy;
 
@@ -20,7 +20,7 @@ public class PgDownloadDAO extends DownloadDAO {
     }
 
     @Override
-    protected Download modelMapper(ResultSet resultSet) throws SQLException {
+    protected DatasetDownload modelMapper(ResultSet resultSet) throws SQLException {
         UUID userId = UUID.fromString(resultSet.getString("user_id"));
         LocalDateTime downloadTime = resultSet.getObject("data_hora", LocalDateTime.class);
         UUID datasetVersionId = UUID.fromString(resultSet.getString("dataset_versao_id"));
@@ -31,34 +31,34 @@ public class PgDownloadDAO extends DownloadDAO {
         DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(this.getConnectionStrategy());
         DatasetVersion datasetVersion = datasetVersionDAO.select(datasetVersionId);
 
-        return new Download(user, downloadTime, datasetVersion);
+        return new DatasetDownload(user, downloadTime, datasetVersion);
     }
 
     @Override
-    public List<Download> list() throws SQLException {
+    public List<DatasetDownload> list() throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.download
+            FROM feature_app.datasetDownload
         """;
 
-        ArrayList<Download> downloads = new ArrayList<>();
+        ArrayList<DatasetDownload> datasetDownloads = new ArrayList<>();
         Connection connection = this.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet result = statement.executeQuery()) {
             while (result.next()) {
-                Download download = modelMapper(result);
-                downloads.add(download);
+                DatasetDownload datasetDownload = modelMapper(result);
+                datasetDownloads.add(datasetDownload);
             }
         }
 
-        return downloads;
+        return datasetDownloads;
     }
 
     @Override
-    public void create(Download model) throws SQLException {
+    public void create(DatasetDownload model) throws SQLException {
         String query = """
-            INSERT INTO feature_app.download (user_id, data_hora, dataset_versao_id)
+            INSERT INTO feature_app.datasetDownload (user_id, data_hora, dataset_versao_id)
             VALUES (?::uuid, ?::timestamp, ?::uuid)
         """;
 
@@ -73,14 +73,14 @@ public class PgDownloadDAO extends DownloadDAO {
     }
 
     @Override
-    public List<Download> selectByUserId(UUID id) throws SQLException {
+    public List<DatasetDownload> selectByUserId(UUID id) throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.download
+            FROM feature_app.datasetDownload
             WHERE user_id = ?::uuid
         """;
 
-        ArrayList<Download> downloads = new ArrayList<>();
+        ArrayList<DatasetDownload> datasetDownloads = new ArrayList<>();
         Connection connection = this.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -88,23 +88,23 @@ public class PgDownloadDAO extends DownloadDAO {
 
             ResultSet result = statement.executeQuery();
             while (result.next()) {
-                Download download = modelMapper(result);
-                downloads.add(download);
+                DatasetDownload datasetDownload = modelMapper(result);
+                datasetDownloads.add(datasetDownload);
             }
         }
 
-        return downloads;
+        return datasetDownloads;
     }
 
     @Override
-    public List<Download> selectByDatasetVersionId(UUID id) throws SQLException {
+    public List<DatasetDownload> selectByDatasetVersionId(UUID id) throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.download
+            FROM feature_app.datasetDownload
             WHERE dataset_versao_id = ?::uuid
         """;
 
-        ArrayList<Download> downloads = new ArrayList<>();
+        ArrayList<DatasetDownload> datasetDownloads = new ArrayList<>();
         Connection connection = this.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -112,21 +112,21 @@ public class PgDownloadDAO extends DownloadDAO {
 
             ResultSet result = statement.executeQuery();
             while (result.next()) {
-                Download download = modelMapper(result);
-                downloads.add(download);
+                DatasetDownload datasetDownload = modelMapper(result);
+                datasetDownloads.add(datasetDownload);
             }
         }
 
-        return downloads;
+        return datasetDownloads;
     }
 
     @Override
-    public void update(Download model) throws SQLException {
+    public void update(DatasetDownload model) throws SQLException {
         throw new UnsupportedOperationException("Update operation is not available for Download.");
     }
 
     @Override
-    public Download select(UUID id) throws SQLException {
+    public DatasetDownload select(UUID id) throws SQLException {
         throw new UnsupportedOperationException("Select operation is not available for Download.");
     }
 

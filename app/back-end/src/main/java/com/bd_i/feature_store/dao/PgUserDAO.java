@@ -99,8 +99,9 @@ public class PgUserDAO extends UserDAO {
             preparedStatement.setObject(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            user = modelMapper(resultSet);
+            if (resultSet.next()) {
+                user = modelMapper(resultSet);
+            }
         }
 
         return user;
