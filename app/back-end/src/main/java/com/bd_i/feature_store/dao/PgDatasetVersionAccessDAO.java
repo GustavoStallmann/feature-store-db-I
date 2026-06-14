@@ -1,6 +1,8 @@
 package com.bd_i.feature_store.dao;
 
 import com.bd_i.feature_store.model.DatasetVersionAccess;
+import com.bd_i.feature_store.model.DatasetVersion;
+import com.bd_i.feature_store.model.User;
 import com.bd_i.feature_store.persistence.ConnectionStrategy;
 
 import java.sql.*;
@@ -16,15 +18,17 @@ public class PgDatasetVersionAccessDAO extends DatasetVersionAccessDAO {
 
     @Override
     protected DatasetVersionAccess modelMapper(ResultSet resultSet) throws SQLException {
-        String userId = resultSet.getString("user_id");
+        UUID userId = UUID.fromString(resultSet.getString("user_id"));
         LocalDateTime accessTime = resultSet.getObject("data_hora", LocalDateTime.class);
-        String datasetVersionId = resultSet.getString("dataset_versao_id");
+        UUID datasetVersionId = UUID.fromString(resultSet.getString("dataset_versao_id"));
 
-        // TODO: link with the dataser version DAO.
-        System.err.println("Dataset version access not linked with dataset version DAO yet");
-//        DatasetVersion datasetVersion = new DatasetVersion();
-//        return new DatasetVersionAccess(userId, accessTime, );
-        return null;
+        UserDAO userDAO = DaoFactory.getUserDAO(this.getConnectionStrategy());
+        User user = userDAO.select(userId);
+
+        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(this.getConnectionStrategy());
+        DatasetVersion datasetVersion = datasetVersionDAO.select(datasetVersionId);
+
+        return new DatasetVersionAccess(user, accessTime, datasetVersion);
     }
 
     @Override

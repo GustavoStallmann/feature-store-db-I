@@ -1,6 +1,6 @@
 package com.bd_i.feature_store.dao;
 
-import com.bd_i.feature_store.model.DatasetDownload;
+import com.bd_i.feature_store.model.DatasetVersionDownload;
 import com.bd_i.feature_store.model.DatasetVersion;
 import com.bd_i.feature_store.model.User;
 import com.bd_i.feature_store.persistence.ConnectionStrategy;
@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PgDownloadDAO extends DownloadDAO {
-    public PgDownloadDAO(ConnectionStrategy connectionStrategy) {
+public class PgDatasetDownloadDAO extends DatasetDownloadDAO {
+    public PgDatasetDownloadDAO(ConnectionStrategy connectionStrategy) {
         super(connectionStrategy);
     }
 
     @Override
-    protected DatasetDownload modelMapper(ResultSet resultSet) throws SQLException {
+    protected DatasetVersionDownload modelMapper(ResultSet resultSet) throws SQLException {
         UUID userId = UUID.fromString(resultSet.getString("user_id"));
         LocalDateTime downloadTime = resultSet.getObject("data_hora", LocalDateTime.class);
         UUID datasetVersionId = UUID.fromString(resultSet.getString("dataset_versao_id"));
@@ -31,34 +31,34 @@ public class PgDownloadDAO extends DownloadDAO {
         DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(this.getConnectionStrategy());
         DatasetVersion datasetVersion = datasetVersionDAO.select(datasetVersionId);
 
-        return new DatasetDownload(user, downloadTime, datasetVersion);
+        return new DatasetVersionDownload(user, downloadTime, datasetVersion);
     }
 
     @Override
-    public List<DatasetDownload> list() throws SQLException {
+    public List<DatasetVersionDownload> list() throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.datasetDownload
+            FROM feature_app.datasetVersionDownload
         """;
 
-        ArrayList<DatasetDownload> datasetDownloads = new ArrayList<>();
+        ArrayList<DatasetVersionDownload> datasetVersionDownloads = new ArrayList<>();
         Connection connection = this.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet result = statement.executeQuery()) {
             while (result.next()) {
-                DatasetDownload datasetDownload = modelMapper(result);
-                datasetDownloads.add(datasetDownload);
+                DatasetVersionDownload datasetVersionDownload = modelMapper(result);
+                datasetVersionDownloads.add(datasetVersionDownload);
             }
         }
 
-        return datasetDownloads;
+        return datasetVersionDownloads;
     }
 
     @Override
-    public void create(DatasetDownload model) throws SQLException {
+    public void create(DatasetVersionDownload model) throws SQLException {
         String query = """
-            INSERT INTO feature_app.datasetDownload (user_id, data_hora, dataset_versao_id)
+            INSERT INTO feature_app.datasetVersionDownload (user_id, data_hora, dataset_versao_id)
             VALUES (?::uuid, ?::timestamp, ?::uuid)
         """;
 
@@ -73,14 +73,14 @@ public class PgDownloadDAO extends DownloadDAO {
     }
 
     @Override
-    public List<DatasetDownload> selectByUserId(UUID id) throws SQLException {
+    public List<DatasetVersionDownload> selectByUserId(UUID id) throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.datasetDownload
+            FROM feature_app.datasetVersionDownload
             WHERE user_id = ?::uuid
         """;
 
-        ArrayList<DatasetDownload> datasetDownloads = new ArrayList<>();
+        ArrayList<DatasetVersionDownload> datasetVersionDownloads = new ArrayList<>();
         Connection connection = this.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -88,23 +88,23 @@ public class PgDownloadDAO extends DownloadDAO {
 
             ResultSet result = statement.executeQuery();
             while (result.next()) {
-                DatasetDownload datasetDownload = modelMapper(result);
-                datasetDownloads.add(datasetDownload);
+                DatasetVersionDownload datasetVersionDownload = modelMapper(result);
+                datasetVersionDownloads.add(datasetVersionDownload);
             }
         }
 
-        return datasetDownloads;
+        return datasetVersionDownloads;
     }
 
     @Override
-    public List<DatasetDownload> selectByDatasetVersionId(UUID id) throws SQLException {
+    public List<DatasetVersionDownload> selectByDatasetVersionId(UUID id) throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.datasetDownload
+            FROM feature_app.datasetVersionDownload
             WHERE dataset_versao_id = ?::uuid
         """;
 
-        ArrayList<DatasetDownload> datasetDownloads = new ArrayList<>();
+        ArrayList<DatasetVersionDownload> datasetVersionDownloads = new ArrayList<>();
         Connection connection = this.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -112,21 +112,21 @@ public class PgDownloadDAO extends DownloadDAO {
 
             ResultSet result = statement.executeQuery();
             while (result.next()) {
-                DatasetDownload datasetDownload = modelMapper(result);
-                datasetDownloads.add(datasetDownload);
+                DatasetVersionDownload datasetVersionDownload = modelMapper(result);
+                datasetVersionDownloads.add(datasetVersionDownload);
             }
         }
 
-        return datasetDownloads;
+        return datasetVersionDownloads;
     }
 
     @Override
-    public void update(DatasetDownload model) throws SQLException {
+    public void update(DatasetVersionDownload model) throws SQLException {
         throw new UnsupportedOperationException("Update operation is not available for Download.");
     }
 
     @Override
-    public DatasetDownload select(UUID id) throws SQLException {
+    public DatasetVersionDownload select(UUID id) throws SQLException {
         throw new UnsupportedOperationException("Select operation is not available for Download.");
     }
 
