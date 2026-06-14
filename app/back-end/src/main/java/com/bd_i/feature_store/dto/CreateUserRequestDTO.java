@@ -7,5 +7,8 @@ public record CreateUserRequestDTO(
         String name,
 
         @NotBlank(message = "Informe o cpf")
-        String cpf
+        String cpf,
+
+        @NotBlank(message = "Informe a senha")
+        String password
 ) {}

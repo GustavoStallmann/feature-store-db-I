@@ -23,8 +23,9 @@ public class PgUserDAO extends UserDAO {
         String cpf = resultSet.getString("cpf");
         String name = resultSet.getString("nome");
         String type = resultSet.getString("tipo");
+        String password = resultSet.getString("senha");
 
-        return new User(UUID.fromString(id), cpf, name, UserType.valueOf(type));
+        return new User(UUID.fromString(id), cpf, name, UserType.valueOf(type), password);
     }
 
     @Override
@@ -51,8 +52,8 @@ public class PgUserDAO extends UserDAO {
     @Override
     public void create(User model) throws SQLException {
         String query = """
-            INSERT INTO feature_app.usuario (id, cpf, nome, tipo)
-            VALUES (?::uuid, ?, ?, ?::tipo_usuario)
+            INSERT INTO feature_app.usuario (id, cpf, nome, tipo, senha)
+            VALUES (?::uuid, ?, ?, ?::tipo_usuario, ?)
         """;
 
         Connection connection = getConnection();
@@ -61,16 +62,40 @@ public class PgUserDAO extends UserDAO {
             statement.setString(2, model.getCpf());
             statement.setString(3, model.getName());
             statement.setObject(4, model.getType().name());
+            statement.setString(5, model.getPassword() != null ? model.getPassword() : "");
 
             statement.executeUpdate();
         }
     }
 
     @Override
+    public User selectByCpf(String cpf) throws SQLException {
+        String query = """
+            SELECT *
+            FROM feature_app.usuario
+            WHERE cpf = ?
+            LIMIT 1
+        """;
+
+        Connection connection = getConnection();
+        User user = null;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, cpf);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                user = modelMapper(resultSet);
+            }
+        }
+
+        return user;
+    }
+
+    @Override
     public void update(User model) throws SQLException {
         String query = """
             UPDATE feature_app.usuario
-            SET nome = ?, tipo = ?::tipo_usuario
+            SET nome = ?, tipo = ?::tipo_usuario, senha = ?
             WHERE id = ?
         """;
 
@@ -78,7 +103,8 @@ public class PgUserDAO extends UserDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, model.getName());
             preparedStatement.setObject(2, model.getType().name());
-            preparedStatement.setObject(3, model.getId());
+            preparedStatement.setString(3, model.getPassword() != null ? model.getPassword() : "");
+            preparedStatement.setObject(4, model.getId());
 
             preparedStatement.executeUpdate();
         }

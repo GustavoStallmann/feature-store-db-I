@@ -51,6 +51,13 @@ public class ApiExceptionHandler {
         );
     }
 
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleAuthenticationException(org.springframework.security.core.AuthenticationException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new ResponseDTO<>("Credenciais inválidas", null)
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDTO<Void>> handleException() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
