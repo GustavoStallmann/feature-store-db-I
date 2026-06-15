@@ -1,33 +1,69 @@
-// app/dashboard/page.tsx
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+"use client";
 
-export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
+import { useEffect, useState } from "react";
+import { datasetModel } from "@/app/api/dataset/datasetModel";
+import { IDataset } from "@/app/api/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-  // If no cookie exists, kick them back to login page
-  if (!token) {
-    redirect('/login');
-  }
+export default function DashboardPage() {
+  const [datasets, setDatasets] = useState<IDataset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch from Spring Boot using the secure token
-  const response = await fetch('http://localhost:8080/api/dataset/get', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    return <p>Error loading dashboard data.</p>;
-  }
-
-  const data = await response.json();
+  useEffect(() => {
+    datasetModel
+      .listDatasets()
+      .then((res) => setDatasets(res.data))
+      .catch(() => setError("Falha ao carregar datasets."))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <main style={{ padding: '20px' }}>
+    <main style={{ padding: "20px" }}>
       <h1>Welcome to your Dashboard</h1>
-      <p>Data from database: {JSON.stringify(data)}</p>
+
+      {loading && <p>Carregando datasets...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {!loading && !error && (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead>Origem</TableHead>
+              <TableHead>Criador</TableHead>
+              <TableHead>Criado em</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {datasets.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  Nenhum dataset encontrado.
+                </TableCell>
+              </TableRow>
+            ) : (
+              datasets.map((dataset) => (
+                <TableRow key={dataset.id}>
+                  <TableCell>{dataset.name}</TableCell>
+                  <TableCell>{dataset.description ?? "—"}</TableCell>
+                  <TableCell>{dataset.origin ?? "—"}</TableCell>
+                  <TableCell>{dataset.creatorUser.name}</TableCell>
+                  <TableCell>{new Date(dataset.createdAt).toLocaleDateString("pt-BR")}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      )}
     </main>
   );
 }
