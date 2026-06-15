@@ -11,6 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useForm } from "react-hook-form";
 
 export default function DashboardPage() {
   const [datasets, setDatasets] = useState<IDataset[]>([]);
@@ -24,6 +27,12 @@ export default function DashboardPage() {
       .catch(() => setError("Falha ao carregar datasets."))
       .finally(() => setLoading(false));
   }, []);
+
+  const router = useRouter();
+
+  const handleButton = (data: IDataset) => {
+    router.push(`/dataset-versions?datasetId=${data.id}`);
+  };
 
   return (
     <main style={{ padding: "20px" }}>
@@ -58,6 +67,9 @@ export default function DashboardPage() {
                   <TableCell>{dataset.origin ?? "—"}</TableCell>
                   <TableCell>{dataset.creatorUser.name}</TableCell>
                   <TableCell>{new Date(dataset.createdAt).toLocaleDateString("pt-BR")}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleButton(dataset)}>Ver Versões</Button>
+                  </TableCell>
                 </TableRow>
               ))
             )}
