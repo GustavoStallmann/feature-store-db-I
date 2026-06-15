@@ -32,11 +32,15 @@ public class PgDatasetVersionDAO extends DatasetVersionDAO {
         String parentDatasetVersionId = resultSet.getString("dataset_versao_pai");
 
         ConnectionStrategy connectionStrategy = this.getConnectionStrategy();
-        UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
-        User submittingUser = userDAO.select(submittingUserId);
+        User submittingUser;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy)) {
+            submittingUser = userDAO.select(submittingUserId);
+        }
 
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(connectionStrategy);
-        Dataset dataset = datasetDAO.select(datasetId);
+        Dataset dataset;
+        try (DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(connectionStrategy)) {
+            dataset = datasetDAO.select(datasetId);
+        }
 
         DatasetVersion parentDatasetVersion = null;
         if (parentDatasetVersionId != null) {

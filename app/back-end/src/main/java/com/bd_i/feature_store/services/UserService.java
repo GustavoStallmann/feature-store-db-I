@@ -22,34 +22,34 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public void createUser(CreateUserRequestDTO payload) throws SQLException {
-        try {
-            UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
-            String encodedPassword = passwordEncoder.encode(payload.password());
-            System.out.println(payload);
-            System.out.println(payload.password());
-            User user = new User(
-                    UUID.randomUUID(),
-                    payload.cpf(),
-                    payload.name(),
-                    UserType.user,
-                    encodedPassword
-            );
-            System.out.println(user.getPassword());
+        String encodedPassword = passwordEncoder.encode(payload.password());
+        System.out.println(payload);
+        System.out.println(payload.password());
+        User user = new User(
+                UUID.randomUUID(),
+                payload.cpf(),
+                payload.name(),
+                UserType.user,
+                encodedPassword
+        );
+        System.out.println(user.getPassword());
+        try (UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy)) {
             userDAO.create(user);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.err.println("Falha ao criar usuário");
             throw e;
         }
     }
 
     public List<User> getUsers() throws SQLException {
-        UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
-        return userDAO.list();
+        try (UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy)) {
+            return userDAO.list();
+        }
     }
 
     public User login(String cpf, String password) throws SQLException {
-        UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
-        User user = userDAO.login(cpf, password);
-        return user;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy)) {
+            return userDAO.login(cpf, password);
+        }
     }
 }

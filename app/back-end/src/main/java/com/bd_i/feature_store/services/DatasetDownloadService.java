@@ -30,48 +30,50 @@ public class DatasetDownloadService {
     private final PgConnectionStrategy pgConnectionStrategy;
 
     public List<DatasetVersionDownload> listDownloads() throws SQLException {
-        DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy);
-        return datasetDownloadDAO.list();
+        try (DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy)) {
+            return datasetDownloadDAO.list();
+        }
     }
 
     public List<DatasetVersionDownload> listDownloadsByUserId(UUID userId) throws SQLException {
         getUser(userId);
 
-        DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy);
-        return datasetDownloadDAO.selectByUserId(userId);
+        try (DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy)) {
+            return datasetDownloadDAO.selectByUserId(userId);
+        }
     }
 
     public List<DatasetVersionDownload> listDownloadsByDatasetVersionId(UUID datasetVersionId) throws SQLException {
         getDatasetVersion(datasetVersionId);
 
-        DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy);
-        return datasetDownloadDAO.selectByDatasetVersionId(datasetVersionId);
+        try (DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy)) {
+            return datasetDownloadDAO.selectByDatasetVersionId(datasetVersionId);
+        }
     }
 
     public void createDownload(CreateDownloadRequestDTO payload) throws SQLException {
-        DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy);
-
         DatasetVersionDownload datasetVersionDownload = new DatasetVersionDownload(
                 getUser(payload.userId()),
                 LocalDateTime.now(),
                 getDatasetVersion(payload.datasetVersionId())
         );
 
-        datasetDownloadDAO.create(datasetVersionDownload);
+        try (DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy)) {
+            datasetDownloadDAO.create(datasetVersionDownload);
+        }
     }
 
     public Resource downloadDatasetVersion(UUID datasetVersionId, String userCpf) throws SQLException {
-        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
-        User user = userDAO.selectByCpf(userCpf);
+        User user;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy)) {
+            user = userDAO.selectByCpf(userCpf);
+        }
 
         if (user == null) {
             throw new ResourceNotFound("Usuário não encontrado");
         }
 
         DatasetVersion datasetVersion = getDatasetVersion(datasetVersionId);
-        if (datasetVersion == null) {
-            throw new ResourceNotFound("Dataset inválido");
-        }
 
         DatasetVersionDownload datasetVersionDownload = new DatasetVersionDownload(
                 user,
@@ -79,8 +81,9 @@ public class DatasetDownloadService {
                 datasetVersion
         );
 
-        DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy);
-        datasetDownloadDAO.create(datasetVersionDownload);
+        try (DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy)) {
+            datasetDownloadDAO.create(datasetVersionDownload);
+        }
 
         try {
             Path file = Paths.get(datasetVersion.getFilePath());
@@ -97,8 +100,10 @@ public class DatasetDownloadService {
     }
 
     private User getUser(UUID id) throws SQLException {
-        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
-        User user = userDAO.select(id);
+        User user;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy)) {
+            user = userDAO.select(id);
+        }
 
         if (user == null) {
             throw new ResourceNotFound("Usuário não encontrado");
@@ -108,8 +113,10 @@ public class DatasetDownloadService {
     }
 
     private DatasetVersion getDatasetVersion(UUID id) throws SQLException {
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
-        DatasetVersion datasetVersion = datasetVersionDAO.select(id);
+        DatasetVersion datasetVersion;
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            datasetVersion = datasetVersionDAO.select(id);
+        }
 
         if (datasetVersion == null) {
             throw new ResourceNotFound("Versão do dataset não encontrada");

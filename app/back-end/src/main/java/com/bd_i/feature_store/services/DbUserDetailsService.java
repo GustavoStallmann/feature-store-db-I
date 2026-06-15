@@ -20,8 +20,10 @@ public class DbUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String cpf) throws UsernameNotFoundException {
         try {
-            UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
-            User user = userDAO.selectByCpf(cpf);
+            User user;
+            try (UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy)) {
+                user = userDAO.selectByCpf(cpf);
+            }
             if (user == null) {
                 throw new UsernameNotFoundException("Credenciais inválidas");
             }

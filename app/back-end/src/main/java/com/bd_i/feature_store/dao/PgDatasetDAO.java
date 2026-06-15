@@ -29,8 +29,10 @@ public class PgDatasetDAO extends DatasetDAO {
         String description = resultSet.getString("descricao");
         String origin = resultSet.getString("origem");
 
-        UserDAO userDAO = DaoFactory.getUserDAO(this.getConnectionStrategy());
-        User user = userDAO.select(UUID.fromString(creator));
+        User user;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(this.getConnectionStrategy())) {
+            user = userDAO.select(UUID.fromString(creator));
+        }
         return new Dataset(UUID.fromString(id), createdAt, name, user, updatedAt, description, origin);
     }
 

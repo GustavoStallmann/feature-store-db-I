@@ -34,7 +34,9 @@ public abstract class DAO<T, K> implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
-        connectionStrategy.disconnect(connection);
+    public void close() throws SQLException {
+        if (connection != null) {
+            connectionStrategy.disconnect(connection);
+        }
     }
 }

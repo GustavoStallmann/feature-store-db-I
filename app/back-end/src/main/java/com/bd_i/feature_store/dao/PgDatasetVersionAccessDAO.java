@@ -22,11 +22,15 @@ public class PgDatasetVersionAccessDAO extends DatasetVersionAccessDAO {
         LocalDateTime accessTime = resultSet.getObject("data_hora", LocalDateTime.class);
         UUID datasetVersionId = UUID.fromString(resultSet.getString("dataset_versao_id"));
 
-        UserDAO userDAO = DaoFactory.getUserDAO(this.getConnectionStrategy());
-        User user = userDAO.select(userId);
+        User user;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(this.getConnectionStrategy())) {
+            user = userDAO.select(userId);
+        }
 
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(this.getConnectionStrategy());
-        DatasetVersion datasetVersion = datasetVersionDAO.select(datasetVersionId);
+        DatasetVersion datasetVersion;
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(this.getConnectionStrategy())) {
+            datasetVersion = datasetVersionDAO.select(datasetVersionId);
+        }
 
         return new DatasetVersionAccess(user, accessTime, datasetVersion);
     }

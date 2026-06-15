@@ -32,20 +32,24 @@ public class DatasetVersionService {
     private final PgConnectionStrategy pgConnectionStrategy;
 
     public List<DatasetVersion> listDatasetVersions() throws SQLException {
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
-        return datasetVersionDAO.list();
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            return datasetVersionDAO.list();
+        }
     }
 
     public List<DatasetVersion> listDatasetVersionsByDatasetId(UUID datasetId) throws SQLException {
         getDataset(datasetId);
 
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
-        return datasetVersionDAO.selectByDatasetId(datasetId);
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            return datasetVersionDAO.selectByDatasetId(datasetId);
+        }
     }
 
     public DatasetVersion getDatasetVersion(UUID id) throws SQLException {
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
-        DatasetVersion datasetVersion = datasetVersionDAO.select(id);
+        DatasetVersion datasetVersion;
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            datasetVersion = datasetVersionDAO.select(id);
+        }
 
         if (datasetVersion == null) {
             throw new ResourceNotFound("Versão do dataset não encontrada");
@@ -58,10 +62,13 @@ public class DatasetVersionService {
 
     public void createDatasetVersion(
             CreateDatasetVersionRequestDTO payload,
-            MultipartFile file
+            MultipartFile file,
+            String submittingCpf
     ) throws SQLException, IOException {
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
-        DatasetVersion existing = datasetVersionDAO.selectByVersionAndDatasetId(payload.version(), payload.datasetId());
+        DatasetVersion existing;
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            existing = datasetVersionDAO.selectByVersionAndDatasetId(payload.version(), payload.datasetId());
+        }
         if (existing != null) {
             throw new IllegalArgumentException("Esta versão já existe para este dataset");
         }
@@ -85,23 +92,29 @@ public class DatasetVersionService {
 
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
+        User submittingUser;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy)) {
+            submittingUser = userDAO.selectByCpf(submittingCpf);
+        }
+
         DatasetVersion datasetVersion = new DatasetVersion(
                 UUID.randomUUID(),
                 payload.version(),
                 payload.modifications(),
                 LocalDateTime.now(),
                 targetPath.toAbsolutePath().toString(),
-                getUser(payload.submittingUserId()),
+                submittingUser,
                 getDataset(payload.datasetId()),
                 getParentDatasetVersion(payload.parentDatasetVersionId())
         );
 
-        datasetVersionDAO.create(datasetVersion);
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            datasetVersionDAO.create(datasetVersion);
+        }
     }
 
     public void updateDatasetVersion(UUID id, UpdateDatasetVersionRequestDTO payload) throws SQLException {
         DatasetVersion currentDatasetVersion = getDatasetVersion(id);
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
 
         DatasetVersion updatedDatasetVersion = new DatasetVersion(
                 currentDatasetVersion.getId(),
@@ -114,19 +127,24 @@ public class DatasetVersionService {
                 getParentDatasetVersion(payload.parentDatasetVersionId())
         );
 
-        datasetVersionDAO.update(updatedDatasetVersion);
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            datasetVersionDAO.update(updatedDatasetVersion);
+        }
     }
 
     public void deleteDatasetVersion(UUID id) throws SQLException {
         getDatasetVersion(id);
 
-        DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy);
-        datasetVersionDAO.delete(id);
+        try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
+            datasetVersionDAO.delete(id);
+        }
     }
 
     private User getUser(UUID id) throws SQLException {
-        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
-        User user = userDAO.select(id);
+        User user;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy)) {
+            user = userDAO.select(id);
+        }
 
         if (user == null) {
             throw new ResourceNotFound("Usuário não encontrado");
@@ -136,8 +154,10 @@ public class DatasetVersionService {
     }
 
     private Dataset getDataset(UUID id) throws SQLException {
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
-        Dataset dataset = datasetDAO.select(id);
+        Dataset dataset;
+        try (DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy)) {
+            dataset = datasetDAO.select(id);
+        }
 
         if (dataset == null) {
             throw new ResourceNotFound("Dataset não encontrado");

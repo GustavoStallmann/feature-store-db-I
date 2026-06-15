@@ -24,22 +24,28 @@ public class DatasetService {
     private final PgConnectionStrategy pgConnectionStrategy;
 
     public void createDataset(CreateDatasetRequestDTO payload, String creatorCpf) throws SQLException {
-        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
-        User creatorUser = userDAO.selectByCpf(creatorCpf);
+        User creatorUser;
+        try (UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy)) {
+            creatorUser = userDAO.selectByCpf(creatorCpf);
+        }
 
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
         Dataset dataset = new Dataset(UUID.randomUUID(), LocalDate.now(), payload.name(), creatorUser, LocalDate.now(), payload.description(), payload.origin());
-        datasetDAO.create(dataset);
+        try (DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy)) {
+            datasetDAO.create(dataset);
+        }
     }
 
     public List<Dataset> listDatasets() throws SQLException {
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
-        return datasetDAO.list();
+        try (DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy)) {
+            return datasetDAO.list();
+        }
     }
 
     public Dataset getDataset(UUID id) throws SQLException {
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
-        Dataset dataset = datasetDAO.select(id);
+        Dataset dataset;
+        try (DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy)) {
+            dataset = datasetDAO.select(id);
+        }
 
         if (dataset == null) {
             throw new ResourceNotFound("Dataset não encontrado");
@@ -50,7 +56,6 @@ public class DatasetService {
 
     public void updateDataset(UUID id, UpdateDatasetRequestDTO payload) throws SQLException {
         Dataset currentDataset = getDataset(id);
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
 
         Dataset updatedDataset = new Dataset(
                 currentDataset.getId(),
@@ -62,13 +67,16 @@ public class DatasetService {
                 payload.origin()
         );
 
-        datasetDAO.update(updatedDataset);
+        try (DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy)) {
+            datasetDAO.update(updatedDataset);
+        }
     }
 
     public void deleteDataset(UUID id) throws SQLException {
         getDataset(id);
 
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
-        datasetDAO.delete(id);
+        try (DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy)) {
+            datasetDAO.delete(id);
+        }
     }
 }

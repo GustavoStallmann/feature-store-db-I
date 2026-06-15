@@ -62,9 +62,9 @@ public class DatasetVersionController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("version") int version,
             @RequestParam(value = "modifications", required = false) String modifications,
-            @RequestParam("submittingUserId") UUID submittingUserId,
             @RequestParam("datasetId") UUID datasetId,
-            @RequestParam(value = "parentDatasetVersionId", required = false) UUID parentDatasetVersionId
+            @RequestParam(value = "parentDatasetVersionId", required = false) UUID parentDatasetVersionId,
+            Principal principal
     ) throws SQLException, IOException {
         if (version < 1) {
             throw new IllegalArgumentException("Informe uma versão válida");
@@ -73,12 +73,10 @@ public class DatasetVersionController {
         CreateDatasetVersionRequestDTO body = new CreateDatasetVersionRequestDTO(
                 version,
                 modifications,
-                "",
-                submittingUserId,
                 datasetId,
                 parentDatasetVersionId
         );
-        datasetVersionService.createDatasetVersion(body, file);
+        datasetVersionService.createDatasetVersion(body, file, principal.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseDTO<>("Versão do dataset criada com sucesso", null)
