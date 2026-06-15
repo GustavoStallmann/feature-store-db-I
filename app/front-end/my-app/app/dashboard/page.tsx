@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { datasetModel } from "@/app/api/dataset/datasetModel";
 import { IDataset } from "@/app/api/types";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const [datasets, setDatasets] = useState<IDataset[]>([]);
@@ -27,7 +29,12 @@ export default function DashboardPage() {
 
   return (
     <main style={{ padding: "20px" }}>
-      <h1>Welcome to your Dashboard</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <h1>Bem vindo(a) ao dashboard</h1>
+        <Button asChild>
+          <Link href="/dashboard/datasets/create">Novo Dataset</Link>
+        </Button>
+      </div>
 
       {loading && <p>Carregando datasets...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}

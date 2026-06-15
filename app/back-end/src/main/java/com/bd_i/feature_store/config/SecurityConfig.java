@@ -2,6 +2,7 @@ package com.bd_i.feature_store.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -19,9 +20,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").hasRole("admin")
+                        .requestMatchers(HttpMethod.POST, "/api/users").hasRole("admin")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
