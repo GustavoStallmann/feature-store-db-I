@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -39,8 +40,11 @@ public class DatasetController {
     }
 
     @PostMapping
-    ResponseEntity<ResponseDTO<Void>> postDataset(@Valid @RequestBody CreateDatasetRequestDTO body) throws SQLException {
-        datasetService.createDataset(body);
+    ResponseEntity<ResponseDTO<Void>> postDataset(
+            @Valid @RequestBody CreateDatasetRequestDTO body,
+            Principal principal
+    ) throws SQLException {
+        datasetService.createDataset(body, principal.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseDTO<>("Dataset criado com sucesso", null)

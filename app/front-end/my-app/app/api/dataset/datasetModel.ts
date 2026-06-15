@@ -3,7 +3,6 @@ import { IDataset } from "../types";
 
 export interface ICreateDatasetInput {
     name: string;
-    creatorUserId: string;
     description?: string;
     origin?: string;
 }

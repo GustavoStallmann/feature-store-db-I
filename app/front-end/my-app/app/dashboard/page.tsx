@@ -14,6 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/dist/client/components/navigation";
 import { useForm } from "react-hook-form";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const [datasets, setDatasets] = useState<IDataset[]>([]);
@@ -36,7 +38,12 @@ export default function DashboardPage() {
 
   return (
     <main style={{ padding: "20px" }}>
-      <h1>Welcome to your Dashboard</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <h1>Bem vindo(a) ao dashboard</h1>
+        <Button asChild>
+          <Link href="/dashboard/datasets/create">Novo Dataset</Link>
+        </Button>
+      </div>
 
       {loading && <p>Carregando datasets...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -67,9 +74,6 @@ export default function DashboardPage() {
                   <TableCell>{dataset.origin ?? "—"}</TableCell>
                   <TableCell>{dataset.creatorUser.name}</TableCell>
                   <TableCell>{new Date(dataset.createdAt).toLocaleDateString("pt-BR")}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => handleButton(dataset)}>Ver Versões</Button>
-                  </TableCell>
                 </TableRow>
               ))
             )}

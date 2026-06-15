@@ -23,16 +23,15 @@ import java.util.UUID;
 public class DatasetService {
     private final PgConnectionStrategy pgConnectionStrategy;
 
-    public void createDataset(CreateDatasetRequestDTO payload, User currentUser) throws SQLException {
-        try {
-            DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
-            Dataset dataset = new Dataset(UUID.randomUUID(), LocalDate.now(), payload.name(), currentUser, LocalDate.now(), payload.description(), payload.origin());
-            datasetDAO.create(dataset);
-        } catch (Exception e) {
-            System.err.println("Falha ao criar dataset");
-            throw e;
-        }
+    public void createDataset(CreateDatasetRequestDTO payload, String creatorCpf) throws SQLException {
+        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
+        User creatorUser = userDAO.selectByCpf(creatorCpf);
+
+        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
+        Dataset dataset = new Dataset(UUID.randomUUID(), LocalDate.now(), payload.name(), creatorUser, LocalDate.now(), payload.description(), payload.origin());
+        datasetDAO.create(dataset);
     }
+
     public List<Dataset> listDatasets() throws SQLException {
         DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
         return datasetDAO.list();
@@ -47,24 +46,6 @@ public class DatasetService {
         }
 
         return dataset;
-    }
-
-    public void createDataset(CreateDatasetRequestDTO payload) throws SQLException {
-        DatasetDAO datasetDAO = DaoFactory.getDatasetDAO(pgConnectionStrategy);
-        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
-        User creatorUser = userDAO.select(payload.creatorUserId());
-
-        Dataset dataset = new Dataset(
-                UUID.randomUUID(),
-                LocalDate.now(),
-                payload.name(),
-                creatorUser,
-                LocalDate.now(),
-                payload.description(),
-                payload.origin()
-        );
-
-        datasetDAO.create(dataset);
     }
 
     public void updateDataset(UUID id, UpdateDatasetRequestDTO payload) throws SQLException {
