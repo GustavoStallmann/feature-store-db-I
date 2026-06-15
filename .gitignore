@@ -1,3 +1,7 @@
 .idea
-.envproperties
+.classpath
+.settings
+.project
+.factorypath
 **/*.env.*
+target
