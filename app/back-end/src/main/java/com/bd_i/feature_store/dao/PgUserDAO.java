@@ -1,5 +1,6 @@
 package com.bd_i.feature_store.dao;
 
+import com.bd_i.feature_store.dao.UserDAO;
 import com.bd_i.feature_store.model.User;
 import com.bd_i.feature_store.model.UserType;
 import com.bd_i.feature_store.persistence.ConnectionStrategy;
@@ -146,4 +147,29 @@ public class PgUserDAO extends UserDAO {
             preparedStatement.executeUpdate();
         }
     }
+
+    @Override
+    public User login(String cpf, String password) throws SQLException {
+        String query = """
+            SELECT *
+            FROM feature_app.usuario
+            WHERE cpf=? AND senha = ?
+            LIMIT 1
+        """;
+
+        Connection connection = getConnection();
+        User user = null;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, cpf);
+            preparedStatement.setString(2, password);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                user = modelMapper(resultSet);
+            }
+        }
+
+        return user;
+    }
+
 }

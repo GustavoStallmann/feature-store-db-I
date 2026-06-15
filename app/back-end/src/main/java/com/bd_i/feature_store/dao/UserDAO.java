@@ -12,4 +12,5 @@ public abstract class UserDAO extends DAO<User, UUID>{
     }
 
     public abstract User selectByCpf(String cpf) throws SQLException;
+    public abstract User login(String cpf, String password) throws SQLException;
 }

@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -24,6 +25,8 @@ public class UserService {
         try {
             UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
             String encodedPassword = passwordEncoder.encode(payload.password());
+            System.out.println(payload);
+            System.out.println(payload.password());
             User user = new User(
                     UUID.randomUUID(),
                     payload.cpf(),
@@ -31,6 +34,7 @@ public class UserService {
                     UserType.user,
                     encodedPassword
             );
+            System.out.println(user.getPassword());
             userDAO.create(user);
         } catch (Exception e) {
             System.err.println("Falha ao criar usuário");
@@ -41,5 +45,11 @@ public class UserService {
     public List<User> getUsers() throws SQLException {
         UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
         return userDAO.list();
+    }
+
+    public User login(String cpf, String password) throws SQLException {
+        UserDAO userDAO = DaoFactory.getUserDAO(connectionStrategy);
+        User user = userDAO.login(cpf, password);
+        return user;
     }
 }

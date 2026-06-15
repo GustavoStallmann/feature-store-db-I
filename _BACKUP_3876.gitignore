@@ -1,0 +1,12 @@
+.idea
+<<<<<<< HEAD
+.classpath
+.settings
+.project
+.factorypath
+**/*.env.*
+target
+=======
+**/*.env.*
+*.csv
+>>>>>>> a6f5d96e9a55e4a933ccb10dbb731569c502473f

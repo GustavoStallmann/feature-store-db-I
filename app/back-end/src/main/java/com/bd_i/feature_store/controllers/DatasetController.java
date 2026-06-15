@@ -1,18 +1,9 @@
 package com.bd_i.feature_store.controllers;
 
 import com.bd_i.feature_store.dto.CreateDatasetRequestDTO;
-<<<<<<< HEAD
-import com.bd_i.feature_store.dto.CreateUserRequestDTO;
-=======
->>>>>>> a6f5d96e9a55e4a933ccb10dbb731569c502473f
 import com.bd_i.feature_store.dto.ResponseDTO;
 import com.bd_i.feature_store.dto.UpdateDatasetRequestDTO;
 import com.bd_i.feature_store.model.Dataset;
-<<<<<<< HEAD
-import com.bd_i.feature_store.model.User;
-import com.bd_i.feature_store.persistence.PgConnectionStrategy;
-=======
->>>>>>> a6f5d96e9a55e4a933ccb10dbb731569c502473f
 import com.bd_i.feature_store.services.DatasetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,11 +29,6 @@ public class DatasetController {
         );
     }
 
-<<<<<<< HEAD
-    @PostMapping
-    ResponseEntity<ResponseDTO<Void>> postDataset(@Valid @RequestBody CreateDatasetRequestDTO body, User currentUser) throws SQLException {
-        datasetService.createDataset(body, currentUser);
-=======
     @GetMapping("/{id}")
     ResponseEntity<ResponseDTO<Dataset>> getDataset(@PathVariable UUID id) throws SQLException {
         Dataset dataset = datasetService.getDataset(id);
@@ -55,14 +41,11 @@ public class DatasetController {
     @PostMapping
     ResponseEntity<ResponseDTO<Void>> postDataset(@Valid @RequestBody CreateDatasetRequestDTO body) throws SQLException {
         datasetService.createDataset(body);
->>>>>>> a6f5d96e9a55e4a933ccb10dbb731569c502473f
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseDTO<>("Dataset criado com sucesso", null)
         );
     }
-<<<<<<< HEAD
-=======
 
     @PutMapping("/{id}")
     ResponseEntity<ResponseDTO<Void>> putDataset(
@@ -84,5 +67,4 @@ public class DatasetController {
                 new ResponseDTO<>("Dataset removido com sucesso", null)
         );
     }
->>>>>>> a6f5d96e9a55e4a933ccb10dbb731569c502473f
 }

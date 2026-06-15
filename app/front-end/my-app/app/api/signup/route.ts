@@ -3,21 +3,22 @@ import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
-    const { cpf, senha } = await request.json();
+    const { cpf, senha, nome } = await request.json();
 
     console.log('Received login request for CPF:', cpf);
     console.log('Received login request for senha:', senha);
-    const url = `http://localhost:8080/api/users/login?cpf=${cpf}&senha=${senha}`;
+    const url = `http://localhost:8080/api/users/create`;
     console.log('Forwarding login request to Spring Boot at:', url);
     // 1. Forward credentials to your Spring Boot backend
     const springResponse = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cpf: cpf, password: senha, name: nome }),
     } );
 
     // If Spring Boot says the user doesn't exist or password is wrong
     if (!springResponse.ok) {
-      console.error('Spring Boot login failed:', await springResponse.statusText);
+      console.error('Spring Boot signup failed:', await springResponse.statusText);
       return NextResponse.json(
         { message: 'Invalid user cpf' },
         { status: 401 }
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Signup error:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

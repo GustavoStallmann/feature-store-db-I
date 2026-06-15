@@ -5,17 +5,10 @@ import com.bd_i.feature_store.dao.DaoFactory;
 import com.bd_i.feature_store.dao.DatasetDAO;
 import com.bd_i.feature_store.dao.UserDAO;
 import com.bd_i.feature_store.dto.CreateDatasetRequestDTO;
-<<<<<<< HEAD
-import com.bd_i.feature_store.dto.CreateUserRequestDTO;
-import com.bd_i.feature_store.model.Dataset;
-import com.bd_i.feature_store.model.User;
-import com.bd_i.feature_store.model.UserType;
-=======
 import com.bd_i.feature_store.dto.UpdateDatasetRequestDTO;
 import com.bd_i.feature_store.exception.ResourceNotFound;
 import com.bd_i.feature_store.model.Dataset;
 import com.bd_i.feature_store.model.User;
->>>>>>> a6f5d96e9a55e4a933ccb10dbb731569c502473f
 import com.bd_i.feature_store.persistence.PgConnectionStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
