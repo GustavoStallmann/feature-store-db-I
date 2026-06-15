@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +39,21 @@ public class DatasetVersionAccessService {
 
         DatasetVersionAccessDAO datasetVersionAccessDAO = DaoFactory.getDatasetVersionAccessDAO(pgConnectionStrategy);
         return datasetVersionAccessDAO.selectByDatasetId(datasetVersionId);
+    }
+
+    public void registerAccess(UUID versionId, String userCpf) throws SQLException {
+        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
+        User user = userDAO.selectByCpf(userCpf);
+
+        if (user == null) {
+            throw new ResourceNotFound("Usuário não encontrado");
+        }
+
+        DatasetVersion datasetVersion = getDatasetVersion(versionId);
+
+        DatasetVersionAccess access = new DatasetVersionAccess(user, LocalDateTime.now(), datasetVersion);
+        DatasetVersionAccessDAO datasetVersionAccessDAO = DaoFactory.getDatasetVersionAccessDAO(pgConnectionStrategy);
+        datasetVersionAccessDAO.create(access);
     }
 
     private User getUser(UUID id) throws SQLException {

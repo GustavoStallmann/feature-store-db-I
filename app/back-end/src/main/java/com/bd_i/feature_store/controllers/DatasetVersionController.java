@@ -4,6 +4,7 @@ import com.bd_i.feature_store.dto.CreateDatasetVersionRequestDTO;
 import com.bd_i.feature_store.dto.ResponseDTO;
 import com.bd_i.feature_store.dto.UpdateDatasetVersionRequestDTO;
 import com.bd_i.feature_store.model.DatasetVersion;
+import com.bd_i.feature_store.services.DatasetVersionAccessService;
 import com.bd_i.feature_store.services.DatasetVersionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DatasetVersionController {
     private final DatasetVersionService datasetVersionService;
+    private final DatasetVersionAccessService datasetVersionAccessService;
 
     @GetMapping
     ResponseEntity<ResponseDTO<List<DatasetVersion>>> listDatasetVersions() throws SQLException {
@@ -34,7 +37,8 @@ public class DatasetVersionController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<ResponseDTO<DatasetVersion>> getDatasetVersion(@PathVariable UUID id) throws SQLException {
+    ResponseEntity<ResponseDTO<DatasetVersion>> getDatasetVersion(@PathVariable UUID id, Principal principal) throws SQLException {
+        datasetVersionAccessService.registerAccess(id, principal.getName());
         DatasetVersion datasetVersion = datasetVersionService.getDatasetVersion(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(
