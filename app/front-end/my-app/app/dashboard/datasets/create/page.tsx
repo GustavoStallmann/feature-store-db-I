@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -13,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { datasetModel, ICreateDatasetInput } from "@/app/api/dataset/datasetModel";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function CreateDatasetPage() {
     const router = useRouter();
@@ -72,9 +74,10 @@ export default function CreateDatasetPage() {
                                 variant="outline"
                                 onClick={() => router.push("/dashboard")}
                             >
-                                Cancelar
+                                <X className="size-4" />Cancelar
                             </Button>
                             <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? <Spinner className="size-4" /> : <Plus className="size-4" />}
                                 {isSubmitting ? "Salvando..." : "Criar Dataset"}
                             </Button>
                         </div>
