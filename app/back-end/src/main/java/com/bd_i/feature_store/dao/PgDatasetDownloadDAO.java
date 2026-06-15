@@ -38,7 +38,7 @@ public class PgDatasetDownloadDAO extends DatasetDownloadDAO {
     public List<DatasetVersionDownload> list() throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.datasetVersionDownload
+            FROM feature_app.download
         """;
 
         ArrayList<DatasetVersionDownload> datasetVersionDownloads = new ArrayList<>();
@@ -58,7 +58,7 @@ public class PgDatasetDownloadDAO extends DatasetDownloadDAO {
     @Override
     public void create(DatasetVersionDownload model) throws SQLException {
         String query = """
-            INSERT INTO feature_app.datasetVersionDownload (user_id, data_hora, dataset_versao_id)
+            INSERT INTO feature_app.download (user_id, data_hora, dataset_versao_id)
             VALUES (?::uuid, ?::timestamp, ?::uuid)
         """;
 
@@ -76,7 +76,7 @@ public class PgDatasetDownloadDAO extends DatasetDownloadDAO {
     public List<DatasetVersionDownload> selectByUserId(UUID id) throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.datasetVersionDownload
+            FROM feature_app.download
             WHERE user_id = ?::uuid
         """;
 
@@ -100,7 +100,7 @@ public class PgDatasetDownloadDAO extends DatasetDownloadDAO {
     public List<DatasetVersionDownload> selectByDatasetVersionId(UUID id) throws SQLException {
         String query = """
             SELECT *
-            FROM feature_app.datasetVersionDownload
+            FROM feature_app.download
             WHERE dataset_versao_id = ?::uuid
         """;
 

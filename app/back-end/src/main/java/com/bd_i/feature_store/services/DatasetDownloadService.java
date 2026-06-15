@@ -13,6 +13,12 @@ import com.bd_i.feature_store.persistence.PgConnectionStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,6 +58,42 @@ public class DatasetDownloadService {
         );
 
         datasetDownloadDAO.create(datasetVersionDownload);
+    }
+
+    public Resource downloadDatasetVersion(UUID datasetVersionId, String userCpf) throws SQLException {
+        UserDAO userDAO = DaoFactory.getUserDAO(pgConnectionStrategy);
+        User user = userDAO.selectByCpf(userCpf);
+
+        if (user == null) {
+            throw new ResourceNotFound("Usuário não encontrado");
+        }
+
+        DatasetVersion datasetVersion = getDatasetVersion(datasetVersionId);
+        if (datasetVersion == null) {
+            throw new ResourceNotFound("Dataset inválido");
+        }
+
+        DatasetVersionDownload datasetVersionDownload = new DatasetVersionDownload(
+                user,
+                LocalDateTime.now(),
+                datasetVersion
+        );
+
+        DatasetDownloadDAO datasetDownloadDAO = DaoFactory.getDownloadDAO(pgConnectionStrategy);
+        datasetDownloadDAO.create(datasetVersionDownload);
+
+        try {
+            Path file = Paths.get(datasetVersion.getFilePath());
+            Resource resource = new UrlResource(file.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new ResourceNotFound("Arquivo não encontrado");
+            }
+        } catch (MalformedURLException e) {
+            throw new ResourceNotFound("Arquivo não encontrado: " + e.getMessage());
+        }
     }
 
     private User getUser(UUID id) throws SQLException {
