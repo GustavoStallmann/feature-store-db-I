@@ -1,5 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { Layers, Plus } from "lucide-react";
+import { useRouter } from "next/dist/client/components/navigation";
 import { datasetModel } from "@/app/api/dataset/datasetModel";
 import { IDataset } from "@/app/api/types";
 import { Button } from "@/components/ui/button";
@@ -10,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -18,16 +22,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Spinner } from "@/components/ui/spinner";
-import { Layers, Plus } from "lucide-react";
-import { useRouter } from "next/dist/client/components/navigation";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { CreateDatasetDialog } from "./_components/CreateDatasetDialog";
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   const [datasets, setDatasets] = useState<IDataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     datasetModel
@@ -35,24 +39,29 @@ export default function DashboardPage() {
       .then((res) => setDatasets(res.data))
       .catch(() => setError("Falha ao carregar datasets."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [refreshKey]);
 
-  const router = useRouter();
-
-  const handleButton = (data: IDataset) => {
-    router.push(`/dataset-versions?datasetId=${data.id}&datasetName=${encodeURIComponent(data.name)}`);
+  const refresh = () => {
+    setLoading(true);
+    setRefreshKey((k) => k + 1);
   };
 
   return (
     <main style={{ padding: "20px" }}>
       <h1 className="text-2xl font-bold mb-4">Bem vindo(a) ao dashboard</h1>
 
+      <CreateDatasetDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={refresh}
+      />
+
       <Card>
         <CardHeader>
           <CardTitle>Datasets</CardTitle>
           <CardAction>
-            <Button asChild>
-              <Link href="/dashboard/datasets/create"><Plus className="size-4" />Novo Dataset</Link>
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="size-4" />Novo Dataset
             </Button>
           </CardAction>
         </CardHeader>
@@ -93,7 +102,7 @@ export default function DashboardPage() {
                       <TableCell>{dataset.creatorUser.name}</TableCell>
                       <TableCell>{new Date(dataset.createdAt).toLocaleDateString("pt-BR")}</TableCell>
                       <TableCell>
-                        <Button variant="outline" size="sm" onClick={() => handleButton(dataset)}>
+                        <Button variant="outline" size="sm" onClick={() => router.push(`/dataset-versions?datasetId=${dataset.id}&datasetName=${encodeURIComponent(dataset.name)}`)}>
                           <Layers className="size-4" />Ver versões
                         </Button>
                       </TableCell>

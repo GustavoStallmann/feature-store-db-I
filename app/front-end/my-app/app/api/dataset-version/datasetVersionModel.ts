@@ -4,7 +4,6 @@ import { IDatasetVersion } from "../types";
 export interface ICreateDatasetVersionInput {
     file: File;
     version: number;
-    submittingUserId: string;
     datasetId: string;
     modifications?: string;
     parentDatasetVersionId?: string;
@@ -39,7 +38,6 @@ export class DatasetVersionModel {
         const form = new FormData();
         form.append('file', payload.file);
         form.append('version', String(payload.version));
-        form.append('submittingUserId', payload.submittingUserId);
         form.append('datasetId', payload.datasetId);
         if (payload.modifications) form.append('modifications', payload.modifications);
         if (payload.parentDatasetVersionId) form.append('parentDatasetVersionId', payload.parentDatasetVersionId);

@@ -1,13 +1,7 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/dist/client/components/navigation";
-import { datasetVersionModel } from "../api/dataset-version/datasetVersionModel";
-import { datasetVersionDownloadModel } from "../api/dataset-version-download/datasetVersionDownloadModel";
 import { IDatasetVersion } from "@/app/api/types";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { ArrowLeft, Download } from "lucide-react";
 import {
   Card,
   CardAction,
@@ -15,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -23,6 +18,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ArrowLeft, Download, Plus } from "lucide-react";
+import { useRouter } from "next/dist/client/components/navigation";
+import { use, useEffect, useState } from "react";
+import { datasetVersionDownloadModel } from "../api/dataset-version-download/datasetVersionDownloadModel";
+import { datasetVersionModel } from "../api/dataset-version/datasetVersionModel";
+import { CreateDatasetVersionDialog } from "./_components/CreateDatasetVersionDialog";
 
 export default function DatasetVersionsPage({
   searchParams,
@@ -35,6 +36,8 @@ export default function DatasetVersionsPage({
   const [datasetVersions, setDatasetVersions] = useState<IDatasetVersion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     datasetVersionModel
@@ -42,7 +45,12 @@ export default function DatasetVersionsPage({
       .then((res) => setDatasetVersions(res.data))
       .catch(() => setError("Falha ao carregar versões do dataset."))
       .finally(() => setLoading(false));
-  }, [datasetId]);
+  }, [datasetId, refreshKey]);
+
+  const refresh = () => {
+    setLoading(true);
+    setRefreshKey((k) => k + 1);
+  };
 
   const handleDownload = async (datasetVersionId: string) => {
     try {
@@ -62,10 +70,22 @@ export default function DatasetVersionsPage({
 
   return (
     <main style={{ padding: "20px" }}>
+      <CreateDatasetVersionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={refresh}
+        datasetId={datasetId}
+        datasetName={datasetName}
+        existingVersions={datasetVersions}
+      />
+
       <Card>
         <CardHeader>
           <CardTitle>{decodeURIComponent(datasetName ?? "Versões do dataset")}</CardTitle>
-          <CardAction>
+          <CardAction className="flex gap-2">
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="size-4" />Adicionar nova versão
+            </Button>
             <Button variant="outline" onClick={() => router.push("/dashboard")}>
               <ArrowLeft className="size-4" />Voltar ao dashboard
             </Button>
@@ -78,35 +98,33 @@ export default function DatasetVersionsPage({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Criada em</TableHead>
                   <TableHead>Versão</TableHead>
                   <TableHead>Modificações</TableHead>
-                  <TableHead>Path</TableHead>
                   <TableHead>Criada por</TableHead>
-                  <TableHead>Criada em</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6">
+                    <TableCell colSpan={5} className="text-center py-6">
                       <Spinner className="mx-auto size-5" />
                     </TableCell>
                   </TableRow>
                 ) : datasetVersions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                       Nenhuma versão desse dataset encontrada.
                     </TableCell>
                   </TableRow>
                 ) : (
                   datasetVersions.map((datasetVersion) => (
                     <TableRow key={datasetVersion.id}>
+                      <TableCell>{new Date(datasetVersion.createdAt).toLocaleDateString("pt-BR")}</TableCell>
                       <TableCell>{datasetVersion.version}</TableCell>
                       <TableCell>{datasetVersion.modifications ?? "—"}</TableCell>
-                      <TableCell>{datasetVersion.filePath ?? "—"}</TableCell>
                       <TableCell>{datasetVersion.submittingUser.name}</TableCell>
-                      <TableCell>{new Date(datasetVersion.createdAt).toLocaleDateString("pt-BR")}</TableCell>
                       <TableCell>
                         <Button variant="outline" size="sm" onClick={() => handleDownload(datasetVersion.id)}>
                           <Download className="size-4" />Download
