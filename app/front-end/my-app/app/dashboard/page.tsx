@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CreateDatasetDialog } from "./_components/CreateDatasetDialog";
+import { UpdateDatasetDialog } from "./_components/UpdateDatasetDialog";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -30,7 +31,12 @@ export default function DashboardPage() {
   const [datasets, setDatasets] = useState<IDataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null);
+  const [updateName, setUpdateName] = useState<string | null>(null);
+  const [updateDescription, setUpdateDescription] = useState<string | null>(null);
+  const [updateOrigin, setUpdateOrigin] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -51,16 +57,25 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold mb-4">Bem vindo(a) ao dashboard</h1>
 
       <CreateDatasetDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
         onSuccess={refresh}
+      />
+      <UpdateDatasetDialog
+        id={selectedDatasetId}
+        open={updateDialogOpen}
+        onOpenChange={setUpdateDialogOpen}
+        onSuccess={refresh}
+        name={updateName}
+        description={updateDescription}
+        origin={updateOrigin}
       />
 
       <Card>
         <CardHeader>
           <CardTitle>Datasets</CardTitle>
           <CardAction>
-            <Button onClick={() => setDialogOpen(true)}>
+            <Button onClick={() => setCreateDialogOpen(true)}>
               <Plus className="size-4" />Novo Dataset
             </Button>
           </CardAction>
@@ -104,6 +119,17 @@ export default function DashboardPage() {
                       <TableCell>
                         <Button variant="outline" size="sm" onClick={() => router.push(`/dataset-versions?datasetId=${dataset.id}&datasetName=${encodeURIComponent(dataset.name)}`)}>
                           <Layers className="size-4" />Ver versões
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedDatasetId(dataset.id);
+                          setUpdateName(dataset.name);
+                          setUpdateDescription(dataset.description ?? "");
+                          setUpdateOrigin(dataset.origin ?? "");
+                          setUpdateDialogOpen(true);
+                        }}>
+                          <Plus className="size-4" />Atualizar
                         </Button>
                       </TableCell>
                     </TableRow>
