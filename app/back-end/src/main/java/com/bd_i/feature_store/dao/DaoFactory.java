@@ -55,4 +55,12 @@ public class DaoFactory {
 
         return null;
     }
+
+    public static DatasetStatsDAO getDatasetStatsDAO(ConnectionStrategy connectionStrategy) throws SQLException {
+        if (connectionStrategy instanceof PgConnectionStrategy) {
+            return new PgDatasetStatsDAO(connectionStrategy);
+        }
+
+        return null;
+    }
 }

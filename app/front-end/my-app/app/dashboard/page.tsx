@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import { CreateDatasetDialog } from "./_components/CreateDatasetDialog";
 import { UpdateDatasetDialog } from "./_components/UpdateDatasetDialog";
+import { DatasetReports } from "./_components/DatasetReports";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -138,6 +139,10 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      <h2 className="text-xl font-bold mt-8 mb-4">Relatórios</h2>
+
+      <DatasetReports datasetCount={datasets.length} />
     </main>
   );
 }

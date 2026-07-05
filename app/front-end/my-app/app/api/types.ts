@@ -47,6 +47,25 @@ export interface IDatasetVersionDownload {
 }
 
 export interface IAuthSignInInput {
-    cpf: string; 
-    password: string; 
+    cpf: string;
+    password: string;
+}
+
+export interface IDatasetActivityPoint {
+    day: string;
+    downloads: number;
+    accesses: number;
+}
+
+export interface IDatasetActivitySummary {
+    datasetId: string;
+    datasetName: string;
+    totalDownloads: number;
+    totalAccesses: number;
+}
+
+export interface IHourlyActivityPoint {
+    hour: number;
+    downloads: number;
+    accesses: number;
 }
