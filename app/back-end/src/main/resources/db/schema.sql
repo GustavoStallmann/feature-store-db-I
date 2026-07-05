@@ -48,6 +48,16 @@ CREATE TABLE feature_app.versao_dataset(
 	CONSTRAINT un_versao_dataset_version UNIQUE (versao, dataset_id)
 );
 
+CREATE TABLE feature_app.feature_versao_dataset(
+	versao_dataset_id UUID NOT NULL,
+	nome VARCHAR(100) NOT NULL,
+	descricao TEXT,
+
+	CONSTRAINT pk_feature_versao_dataset PRIMARY KEY (versao_dataset_id, nome),
+	CONSTRAINT fk_feature_versao_dataset_versao_id FOREIGN KEY (versao_dataset_id)
+		REFERENCES feature_app.versao_dataset(id) ON DELETE CASCADE
+);
+
 CREATE TABLE feature_app.download(
 	user_id UUID, 
 	data_hora TIMESTAMP DEFAULT now(),
@@ -131,6 +141,17 @@ INSERT INTO feature_app.versao_dataset (
 	'f3a53e2a-7f0a-496a-8831-4fa009262f90'	
 );
 
+-- feature
+INSERT INTO feature_app.feature_versao_dataset (
+	versao_dataset_id,
+	nome,
+	descricao
+) VALUES (
+	'9b9265c9-4ba4-41f0-a30b-e934d23964d8',
+	'coluna_exemplo',
+	'descricao da feature'
+);
+
 -- download
 INSERT INTO feature_app.download (
 	user_id,
@@ -154,6 +175,7 @@ INSERT INTO feature_app.acesso (
 SELECT * FROM feature_app.usuario;
 SELECT * FROM feature_app.dataset;
 SELECT * FROM feature_app.versao_dataset;
+SELECT * FROM feature_app.feature_versao_dataset;
 SELECT * FROM feature_app.download;
 SELECT * FROM feature_app.acesso;
 

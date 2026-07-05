@@ -1,12 +1,18 @@
 import { client, IResponse } from "../client";
 import { IDatasetVersion } from "../types";
 
+export interface IDatasetVersionFeatureInput {
+    name: string;
+    description?: string;
+}
+
 export interface ICreateDatasetVersionInput {
     file: File;
     version: number;
     datasetId: string;
     modifications?: string;
     parentDatasetVersionId?: string;
+    features: IDatasetVersionFeatureInput[];
 }
 
 export interface IUpdateDatasetVersionInput {
@@ -41,6 +47,7 @@ export class DatasetVersionModel {
         form.append('datasetId', payload.datasetId);
         if (payload.modifications) form.append('modifications', payload.modifications);
         if (payload.parentDatasetVersionId) form.append('parentDatasetVersionId', payload.parentDatasetVersionId);
+        form.append('features', JSON.stringify(payload.features));
 
         const { data } = await client.post<IResponse<null>>('/api/dataset-version', form, {
             headers: { 'Content-Type': 'multipart/form-data' },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Layers, Plus } from "lucide-react";
+import { Layers, Pencil, Plus } from "lucide-react";
 import { useRouter } from "next/dist/client/components/navigation";
 import { datasetModel } from "@/app/api/dataset/datasetModel";
 import { IDataset } from "@/app/api/types";
@@ -92,7 +92,7 @@ export default function DashboardPage() {
                   <TableHead>Origem</TableHead>
                   <TableHead>Criador</TableHead>
                   <TableHead>Criado em</TableHead>
-                  <TableHead />
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -116,12 +116,10 @@ export default function DashboardPage() {
                       <TableCell>{dataset.origin ?? "—"}</TableCell>
                       <TableCell>{dataset.creatorUser.name}</TableCell>
                       <TableCell>{new Date(dataset.createdAt).toLocaleDateString("pt-BR")}</TableCell>
-                      <TableCell>
+                      <TableCell className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => router.push(`/dataset-versions?datasetId=${dataset.id}&datasetName=${encodeURIComponent(dataset.name)}`)}>
                           <Layers className="size-4" />Ver versões
                         </Button>
-                      </TableCell>
-                      <TableCell>
                         <Button variant="outline" size="sm" onClick={() => {
                           setSelectedDatasetId(dataset.id);
                           setUpdateName(dataset.name);
@@ -129,7 +127,7 @@ export default function DashboardPage() {
                           setUpdateOrigin(dataset.origin ?? "");
                           setUpdateDialogOpen(true);
                         }}>
-                          <Plus className="size-4" />Atualizar
+                          <Pencil className="size-4" />Editar
                         </Button>
                       </TableCell>
                     </TableRow>

@@ -3,12 +3,15 @@ package com.bd_i.feature_store.services;
 import com.bd_i.feature_store.dao.DaoFactory;
 import com.bd_i.feature_store.dao.DatasetDAO;
 import com.bd_i.feature_store.dao.DatasetVersionDAO;
+import com.bd_i.feature_store.dao.DatasetVersionFeatureDAO;
 import com.bd_i.feature_store.dao.UserDAO;
 import com.bd_i.feature_store.dto.CreateDatasetVersionRequestDTO;
+import com.bd_i.feature_store.dto.DatasetVersionFeatureInputDTO;
 import com.bd_i.feature_store.dto.UpdateDatasetVersionRequestDTO;
 import com.bd_i.feature_store.exception.ResourceNotFound;
 import com.bd_i.feature_store.model.Dataset;
 import com.bd_i.feature_store.model.DatasetVersion;
+import com.bd_i.feature_store.model.DatasetVersionFeature;
 import com.bd_i.feature_store.model.User;
 import com.bd_i.feature_store.persistence.PgConnectionStrategy;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +66,7 @@ public class DatasetVersionService {
     public void createDatasetVersion(
             CreateDatasetVersionRequestDTO payload,
             MultipartFile file,
+            List<DatasetVersionFeatureInputDTO> features,
             String submittingCpf
     ) throws SQLException, IOException {
         DatasetVersion existing;
@@ -75,6 +79,15 @@ public class DatasetVersionService {
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("O arquivo enviado está vazio");
+        }
+
+        if (features == null || features.isEmpty()) {
+            throw new IllegalArgumentException("Informe ao menos uma feature do dataset");
+        }
+
+        long distinctFeatureNames = features.stream().map(DatasetVersionFeatureInputDTO::name).distinct().count();
+        if (distinctFeatureNames < features.size()) {
+            throw new IllegalArgumentException("Os nomes das features não podem se repetir");
         }
 
         File directory = new File(uploadDir);
@@ -110,6 +123,14 @@ public class DatasetVersionService {
 
         try (DatasetVersionDAO datasetVersionDAO = DaoFactory.getDatasetVersionDAO(pgConnectionStrategy)) {
             datasetVersionDAO.create(datasetVersion);
+        }
+
+        try (DatasetVersionFeatureDAO datasetVersionFeatureDAO = DaoFactory.getDatasetVersionFeatureDAO(pgConnectionStrategy)) {
+            for (DatasetVersionFeatureInputDTO feature : features) {
+                datasetVersionFeatureDAO.create(
+                        new DatasetVersionFeature(feature.name(), feature.description(), datasetVersion)
+                );
+            }
         }
     }
 

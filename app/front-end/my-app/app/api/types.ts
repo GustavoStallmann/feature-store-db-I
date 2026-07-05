@@ -28,6 +28,12 @@ export interface IDatasetVersion {
     parentDatasetVersion: IDatasetVersion | null;
 }
 
+export interface IDatasetVersionFeature {
+    name: string;
+    description: string | null;
+    datasetVersion: IDatasetVersion;
+}
+
 export interface IDatasetVersionAccess {
     user: IUser;
     accessTime: string;

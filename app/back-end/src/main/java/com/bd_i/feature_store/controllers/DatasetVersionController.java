@@ -1,6 +1,7 @@
 package com.bd_i.feature_store.controllers;
 
 import com.bd_i.feature_store.dto.CreateDatasetVersionRequestDTO;
+import com.bd_i.feature_store.dto.DatasetVersionFeatureInputDTO;
 import com.bd_i.feature_store.dto.ResponseDTO;
 import com.bd_i.feature_store.dto.UpdateDatasetVersionRequestDTO;
 import com.bd_i.feature_store.model.DatasetVersion;
@@ -13,6 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -26,6 +30,7 @@ import java.util.UUID;
 public class DatasetVersionController {
     private final DatasetVersionService datasetVersionService;
     private final DatasetVersionAccessService datasetVersionAccessService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     ResponseEntity<ResponseDTO<List<DatasetVersion>>> listDatasetVersions() throws SQLException {
@@ -64,10 +69,18 @@ public class DatasetVersionController {
             @RequestParam(value = "modifications", required = false) String modifications,
             @RequestParam("datasetId") UUID datasetId,
             @RequestParam(value = "parentDatasetVersionId", required = false) UUID parentDatasetVersionId,
+            @RequestParam("features") String featuresJson,
             Principal principal
     ) throws SQLException, IOException {
         if (version < 1) {
             throw new IllegalArgumentException("Informe uma versão válida");
+        }
+
+        List<DatasetVersionFeatureInputDTO> features;
+        try {
+            features = objectMapper.readValue(featuresJson, new TypeReference<List<DatasetVersionFeatureInputDTO>>() {});
+        } catch (JacksonException e) {
+            throw new IllegalArgumentException("Features enviadas em formato inválido");
         }
 
         CreateDatasetVersionRequestDTO body = new CreateDatasetVersionRequestDTO(
@@ -76,7 +89,7 @@ public class DatasetVersionController {
                 datasetId,
                 parentDatasetVersionId
         );
-        datasetVersionService.createDatasetVersion(body, file, principal.getName());
+        datasetVersionService.createDatasetVersion(body, file, features, principal.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseDTO<>("Versão do dataset criada com sucesso", null)
