@@ -102,7 +102,7 @@ export default function DatasetVersionsPage({
                   <TableHead>Versão</TableHead>
                   <TableHead>Modificações</TableHead>
                   <TableHead>Criada por</TableHead>
-                  <TableHead />
+                  <TableHead>Versão Pai</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -125,6 +125,7 @@ export default function DatasetVersionsPage({
                       <TableCell>{datasetVersion.version}</TableCell>
                       <TableCell>{datasetVersion.modifications ?? "—"}</TableCell>
                       <TableCell>{datasetVersion.submittingUser.name}</TableCell>
+                      <TableCell>{datasetVersion.parentDatasetVersion ? datasetVersion.parentDatasetVersion.version : "—"}</TableCell>
                       <TableCell>
                         <Button variant="outline" size="sm" onClick={() => handleDownload(datasetVersion.id)}>
                           <Download className="size-4" />Download
