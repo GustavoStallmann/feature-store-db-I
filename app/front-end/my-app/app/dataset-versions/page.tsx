@@ -126,9 +126,12 @@ export default function DatasetVersionsPage({
                       <TableCell>{datasetVersion.modifications ?? "—"}</TableCell>
                       <TableCell>{datasetVersion.submittingUser.name}</TableCell>
                       <TableCell>{datasetVersion.parentDatasetVersion ? datasetVersion.parentDatasetVersion.version : "—"}</TableCell>
-                      <TableCell>
+                      <TableCell className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => handleDownload(datasetVersion.id)}>
                           <Download className="size-4" />Download
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => router.push(`/dataset-version-features?datasetId=${datasetId}&datasetName=${encodeURIComponent(datasetName)}&datasetVersionId=${datasetVersion.id}&datasetVersionName=${encodeURIComponent(datasetVersion.version.toString())}`)}>
+                          <Download className="size-4" />Detalhes das Features
                         </Button>
                       </TableCell>
                     </TableRow>

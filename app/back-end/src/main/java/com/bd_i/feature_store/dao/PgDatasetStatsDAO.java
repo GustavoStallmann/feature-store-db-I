@@ -48,9 +48,9 @@ public class PgDatasetStatsDAO extends DatasetStatsDAO {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             try (ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
-                    LocalDate day = result.getObject("day", LocalDate.class);
+                    LocalDate day = result.getObject("dia", LocalDate.class);
                     long downloads = result.getLong("downloads");
-                    long accesses = result.getLong("accesses");
+                    long accesses = result.getLong("acessos");
                     points.add(new DatasetActivityPointDTO(day, downloads, accesses));
                 }
             }
@@ -82,7 +82,7 @@ public class PgDatasetStatsDAO extends DatasetStatsDAO {
                 UUID datasetId = UUID.fromString(result.getString("id"));
                 String datasetName = result.getString("nome");
                 long totalDownloads = result.getLong("total_downloads");
-                long totalAccesses = result.getLong("total_accesses");
+                long totalAccesses = result.getLong("total_acessos");
                 summaries.add(new DatasetActivitySummaryDTO(datasetId, datasetName, totalDownloads, totalAccesses));
             }
         }
