@@ -5,7 +5,6 @@ import com.bd_i.feature_store.dto.DatasetVersionFeatureInputDTO;
 import com.bd_i.feature_store.dto.ResponseDTO;
 import com.bd_i.feature_store.dto.UpdateDatasetVersionRequestDTO;
 import com.bd_i.feature_store.model.DatasetVersion;
-import com.bd_i.feature_store.services.DatasetVersionAccessService;
 import com.bd_i.feature_store.services.DatasetVersionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DatasetVersionController {
     private final DatasetVersionService datasetVersionService;
-    private final DatasetVersionAccessService datasetVersionAccessService;
     private final ObjectMapper objectMapper;
 
     @GetMapping
@@ -42,8 +40,7 @@ public class DatasetVersionController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<ResponseDTO<DatasetVersion>> getDatasetVersion(@PathVariable UUID id, Principal principal) throws SQLException {
-        datasetVersionAccessService.registerAccess(id, principal.getName());
+    ResponseEntity<ResponseDTO<DatasetVersion>> getDatasetVersion(@PathVariable UUID id) throws SQLException {
         DatasetVersion datasetVersion = datasetVersionService.getDatasetVersion(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(

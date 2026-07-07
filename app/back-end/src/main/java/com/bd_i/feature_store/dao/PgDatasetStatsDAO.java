@@ -63,14 +63,22 @@ public class PgDatasetStatsDAO extends DatasetStatsDAO {
     public List<DatasetActivitySummaryDTO> selectDatasetActivitySummary() throws SQLException {
         String query = """
             SELECT ds.id, ds.nome,
-                COALESCE(COUNT(a.data_hora), 0) as total_acessos, 
-                COALESCE(COUNT(d.data_hora), 0) as total_downloads
+                COALESCE(SUM(a.total), 0) as total_acessos,
+                COALESCE(SUM(d.total), 0) as total_downloads
             FROM feature_app.versao_dataset dv
-            LEFT JOIN feature_app.acesso a ON dv.id = a.dataset_versao_id
-            LEFT JOIN feature_app.download d ON dv.id = d.dataset_versao_id
             LEFT JOIN feature_app.dataset ds ON ds.id = dv.dataset_id
+            LEFT JOIN (
+                SELECT dataset_versao_id, COUNT(*) AS total
+                FROM feature_app.acesso
+                GROUP BY dataset_versao_id
+            ) a ON a.dataset_versao_id = dv.id
+            LEFT JOIN (
+                SELECT dataset_versao_id, COUNT(*) AS total
+                FROM feature_app.download
+                GROUP BY dataset_versao_id
+            ) d ON d.dataset_versao_id = dv.id
             GROUP BY ds.id, ds.nome
-            ORDER BY COALESCE(COUNT(a.data_hora), 0) DESC, COALESCE(COUNT(d.data_hora), 0) DESC;
+            ORDER BY total_acessos DESC, total_downloads DESC;
         """;
 
         ArrayList<DatasetActivitySummaryDTO> summaries = new ArrayList<>();

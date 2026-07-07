@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -24,7 +25,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${poppins.className} dark h-full antialiased`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col">{children}</body>
+      <body suppressHydrationWarning className="min-h-full flex flex-col px-6">
+        {children}
+        <Toaster theme="dark" />
+      </body>
     </html>
   );
 }

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Upload } from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
 import { datasetVersionModel } from "@/app/api/dataset-version/datasetVersionModel";
 import { IDatasetVersion } from "@/app/api/types";
 import { Button } from "@/components/ui/button";
@@ -111,20 +113,28 @@ export function CreateDatasetVersionDialog({
         }
         setFeaturesError(null);
 
-        await datasetVersionModel.createDatasetVersion({
-            file: data.file[0],
-            version: Number(data.version),
-            datasetId,
-            modifications: data.modifications || undefined,
-            parentDatasetVersionId: data.parentDatasetVersionId || undefined,
-            features: data.features.map((feature) => ({
-                name: feature.name,
-                description: feature.description || undefined,
-            })),
-        });
-        reset();
-        onOpenChange(false);
-        onSuccess();
+        try {
+            await datasetVersionModel.createDatasetVersion({
+                file: data.file[0],
+                version: Number(data.version),
+                datasetId,
+                modifications: data.modifications || undefined,
+                parentDatasetVersionId: data.parentDatasetVersionId || undefined,
+                features: data.features.map((feature) => ({
+                    name: feature.name,
+                    description: feature.description || undefined,
+                })),
+            });
+            toast.success("Versão do dataset criada com sucesso");
+            reset();
+            onOpenChange(false);
+            onSuccess();
+        } catch (err) {
+            const message = axios.isAxiosError<{ message?: string }>(err)
+                ? err.response?.data?.message ?? "Falha ao criar versão do dataset"
+                : "Falha ao criar versão do dataset";
+            toast.error(message);
+        }
     }
 
     return (

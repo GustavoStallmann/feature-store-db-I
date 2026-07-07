@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Download, Plus } from "lucide-react";
+import { ArrowLeft, Download, Eye, Plus } from "lucide-react";
 import { useRouter } from "next/dist/client/components/navigation";
 import { use, useEffect, useState } from "react";
 import { datasetVersionDownloadModel } from "../api/dataset-version-download/datasetVersionDownloadModel";
@@ -131,7 +131,7 @@ export default function DatasetVersionsPage({
                           <Download className="size-4" />Download
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => router.push(`/dataset-version-features?datasetId=${datasetId}&datasetName=${encodeURIComponent(datasetName)}&datasetVersionId=${datasetVersion.id}&datasetVersionName=${encodeURIComponent(datasetVersion.version.toString())}`)}>
-                          <Download className="size-4" />Detalhes das Features
+                          <Eye className="size-4" />Detalhes das Features
                         </Button>
                       </TableCell>
                     </TableRow>

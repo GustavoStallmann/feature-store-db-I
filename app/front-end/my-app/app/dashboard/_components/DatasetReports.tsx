@@ -109,14 +109,11 @@ export function DatasetReports({ datasetCount }: DatasetReportsProps) {
 
   const totalDownloads = summary.reduce((acc, item) => acc + item.totalDownloads, 0);
   const totalAccesses = summary.reduce((acc, item) => acc + item.totalAccesses, 0);
-  const coldDatasets = summary.filter(
-    (item) => item.totalDownloads === 0 && item.totalAccesses === 0
-  ).length;
   const topDatasets = summary.slice(0, 5);
 
   return (
     <div className="mb-6 flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardDescription>Total de datasets</CardDescription>
@@ -133,12 +130,6 @@ export function DatasetReports({ datasetCount }: DatasetReportsProps) {
           <CardHeader>
             <CardDescription>Total de acessos</CardDescription>
             <CardTitle className="text-2xl">{totalAccesses}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>Datasets sem atividade</CardDescription>
-            <CardTitle className="text-2xl">{coldDatasets}</CardTitle>
           </CardHeader>
         </Card>
       </div>

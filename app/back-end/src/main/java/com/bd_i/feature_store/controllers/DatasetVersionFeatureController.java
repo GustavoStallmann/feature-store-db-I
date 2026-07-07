@@ -2,12 +2,14 @@ package com.bd_i.feature_store.controllers;
 
 import com.bd_i.feature_store.dto.ResponseDTO;
 import com.bd_i.feature_store.model.DatasetVersionFeature;
+import com.bd_i.feature_store.services.DatasetVersionAccessService;
 import com.bd_i.feature_store.services.DatasetVersionFeatureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DatasetVersionFeatureController {
     private final DatasetVersionFeatureService datasetVersionFeatureService;
+    private final DatasetVersionAccessService datasetVersionAccessService;
 
     @GetMapping
     ResponseEntity<ResponseDTO<List<DatasetVersionFeature>>> listFeatures() throws SQLException {
@@ -29,8 +32,10 @@ public class DatasetVersionFeatureController {
 
     @GetMapping("/dataset-version/{datasetVersionId}")
     ResponseEntity<ResponseDTO<List<DatasetVersionFeature>>> listFeaturesByDatasetVersionId(
-            @PathVariable UUID datasetVersionId
+            @PathVariable UUID datasetVersionId,
+            Principal principal
     ) throws SQLException {
+        datasetVersionAccessService.registerAccess(datasetVersionId, principal.getName());
         List<DatasetVersionFeature> datasetVersionFeatures = datasetVersionFeatureService.listFeaturesByDatasetVersionId(datasetVersionId);
 
         return ResponseEntity.status(HttpStatus.OK).body(

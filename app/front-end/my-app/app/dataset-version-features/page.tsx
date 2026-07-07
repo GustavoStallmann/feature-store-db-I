@@ -21,6 +21,7 @@ import {
 import { ArrowLeft, Download, Plus } from "lucide-react";
 import { useRouter } from "next/dist/client/components/navigation";
 import { use, useEffect, useState } from "react";
+import { datasetVersionDownloadModel } from "../api/dataset-version-download/datasetVersionDownloadModel";
 import { datasetVersionFeatureModel } from "../api/dataset-version-feature/datasetVersionFeatureModel";
 
 export default function DatasetVersionsPage({
@@ -50,12 +51,31 @@ export default function DatasetVersionsPage({
     setRefreshKey((k) => k + 1);
   };
 
+  const handleDownload = async () => {
+    try {
+      const blob = await datasetVersionDownloadModel.downloadDatasetVersion(datasetVersionId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "dataset.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  };
+
   return (
     <main style={{ padding: "20px" }}>
       <Card>
         <CardHeader>
           <CardTitle>{decodeURIComponent(datasetVersionName ?? "Features da Versão do Dataset")}</CardTitle>
           <CardAction className="flex gap-2">
+            <Button variant="outline" onClick={handleDownload}>
+              <Download className="size-4" />Download
+            </Button>
             <Button variant="outline" onClick={() => router.push(`/dataset-versions?datasetId=${datasetId}&datasetName=${encodeURIComponent(datasetName)}`)}>
               <ArrowLeft className="size-4" />Voltar ao Dataset
             </Button>
