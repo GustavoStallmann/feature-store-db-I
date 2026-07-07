@@ -24,6 +24,7 @@ import { use, useEffect, useState } from "react";
 import { datasetVersionDownloadModel } from "../api/dataset-version-download/datasetVersionDownloadModel";
 import { datasetVersionModel } from "../api/dataset-version/datasetVersionModel";
 import { CreateDatasetVersionDialog } from "./_components/CreateDatasetVersionDialog";
+import { VersionTreeView } from "./_components/VersionTreeView";
 
 export default function DatasetVersionsPage({
   searchParams,
@@ -68,6 +69,12 @@ export default function DatasetVersionsPage({
     }
   };
 
+  const goToFeatures = (datasetVersion: IDatasetVersion) => {
+    router.push(
+      `/dataset-version-features?datasetId=${datasetId}&datasetName=${encodeURIComponent(datasetName)}&datasetVersionId=${datasetVersion.id}&datasetVersionName=${encodeURIComponent(datasetVersion.version.toString())}`
+    );
+  };
+
   return (
     <main style={{ padding: "20px" }}>
       <CreateDatasetVersionDialog
@@ -94,7 +101,13 @@ export default function DatasetVersionsPage({
         <CardContent>
           {error && <p style={{ color: "red" }}>{error}</p>}
 
-          {!error && (
+          {!error && loading && (
+            <div className="flex justify-center py-6">
+              <Spinner className="size-5" />
+            </div>
+          )}
+
+          {!error && !loading && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -106,13 +119,7 @@ export default function DatasetVersionsPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-6">
-                      <Spinner className="mx-auto size-5" />
-                    </TableCell>
-                  </TableRow>
-                ) : datasetVersions.length === 0 ? (
+                {datasetVersions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground">
                       Nenhuma versão desse dataset encontrada.
@@ -130,7 +137,7 @@ export default function DatasetVersionsPage({
                         <Button variant="outline" size="sm" onClick={() => handleDownload(datasetVersion.id)}>
                           <Download className="size-4" />Download
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => router.push(`/dataset-version-features?datasetId=${datasetId}&datasetName=${encodeURIComponent(datasetName)}&datasetVersionId=${datasetVersion.id}&datasetVersionName=${encodeURIComponent(datasetVersion.version.toString())}`)}>
+                        <Button variant="outline" size="sm" onClick={() => goToFeatures(datasetVersion)}>
                           <Eye className="size-4" />Detalhes das Features
                         </Button>
                       </TableCell>
@@ -139,6 +146,13 @@ export default function DatasetVersionsPage({
                 )}
               </TableBody>
             </Table>
+          )}
+
+          {!error && !loading && datasetVersions.length > 0 && (
+            <div className="mt-6">
+              <h3 className="mb-2 text-sm font-semibold text-muted-foreground">Árvore de versões</h3>
+              <VersionTreeView datasetVersions={datasetVersions} />
+            </div>
           )}
         </CardContent>
       </Card>
